@@ -4,7 +4,11 @@
 #define uchar unsigned char
 #define uint unsigned int
 #define D_Type float
-/*
+
+#define max(a,b) ((a>b)?a:b)
+#define min(a,b) ((a<b)?a:b)
+
+/**
 define blob for save input or output data
 parameters:
 n: batch size / in_plane
@@ -15,12 +19,15 @@ w: width / kernel_size_w
 */
 
 typedef struct DataBlob_{
-    uint n, c, h, w;
+    uint n;
+    uint c;
+    uint h;
+    uint w;
     D_Type *data;
 }DataBlob;
 
 
-/*
+/**
 define blob for save weight data
 parameters:
 in_plane
@@ -38,7 +45,7 @@ typedef struct WeightBlob_{
 }WeightBlob;
 
 
-/*
+/**
 define blob to describe optional parameters
 parameters:
 padding_h
@@ -53,7 +60,7 @@ typedef struct ParamsBlobSmall_{
     uchar stride_w;
 }ParamsBlobS;
 
-/*
+/**
 define blob to describe optional parameters
 parameters:
 kernel_h
@@ -71,5 +78,14 @@ typedef struct ParamsBlobLarge_{
     uchar stride_h;
     uchar stride_w;
 }ParamsBlobL;
+
+
+void PrintAll(DataBlob *data){
+    uint data_count = data->n*data->c*data->h*data->w;
+    uint i = 0;
+    for (i=0;i<data_count;i=i+1){
+        printf(">>> Data %d: %f\n",i, data->data[i]);
+    }
+}
 
 #endif // _UTILS_H_

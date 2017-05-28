@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <math.h>
+#include "string.h"
+#include <malloc.h>
 #include "utils.h"
-//#include "relu.h"
+#include "relu.h"
+#include "avg_pooling.h"
+#include "max_pooling.h"
+#include "scale.h"
+#include "batch_normalization.h"
+#include "linear.h"
+#include "convolution.h"
 
 int main(){
-    uint i=0;
-    double j=0.1;
-    for (i=0;i<10000000;i++){
-        j=exp(1.1)+1.1;
-    }
-    printf("%f\n",j);
+     ConvolutionTest();
     return 0;
 }
 
