@@ -1,5 +1,13 @@
+/** \project Convolutional Neural Networks in C: CNN-C
+ * \author iceory
+ * \emal z.zhuangwei@scut.edu.cn
+ * \date 2017.5.29
+ * \reference: https://github.com/BVLC/caffe
+ */
 #ifndef _UTILS_H_
 #define _UTILS_H_
+#include <malloc.h>
+#include "string.h"
 
 #define uchar unsigned char
 #define uint unsigned int
@@ -7,6 +15,7 @@
 
 #define max(a,b) ((a>b)?a:b)
 #define min(a,b) ((a<b)?a:b)
+//#define NULL (void*)0
 
 /**
 define blob for save input or output data
@@ -79,13 +88,27 @@ typedef struct ParamsBlobLarge_{
     uchar stride_w;
 }ParamsBlobL;
 
-
+/**
+print all data of DataBlob object
+*/
 void PrintAll(DataBlob *data){
     uint data_count = data->n*data->c*data->h*data->w;
     uint i = 0;
     for (i=0;i<data_count;i=i+1){
         printf(">>> Data %d: %f\n",i, data->data[i]);
     }
+}
+
+/**
+TO DO:
+you need to re-write these two function for more efficient management of memory pool
+*/
+void* MemoryPool(uint mem_size){
+    return (void *) malloc(mem_size);
+}
+
+void MemoryFree(void *p){
+    free(p);
 }
 
 #endif // _UTILS_H_

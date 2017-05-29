@@ -3,16 +3,12 @@
 #include <math.h>
 #include "utils.h"
 
-void Scale(const DataBlob *bottom, DataBlob *top,
+void Scale(DataBlob *bottom, DataBlob *top,
            const WeightBlob *gamma, const WeightBlob *beta){
 
     uint n=0, c=0, h=0, w=0;
 
-    top->n = bottom->n;
-    top->c = bottom->c;
-    top->h = bottom->h;
-    top->w = bottom->w;
-
+    top = bottom;
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){
             uint top_offset = n*top->c*top->h*top->w+c*top->h*top->w;

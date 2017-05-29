@@ -8,7 +8,7 @@ output dim: N_o*C_o*1*1
 weight dim: N_w*C_i*C_o
 where N_i = N_o = N_w = batch size
 */
-void Linear(const DataBlob *bottom, DataBlob *top,
+void Linear(DataBlob *bottom, DataBlob *top,
             const WeightBlob *weight, const WeightBlob *bias,
             const uchar bias_term){
     uint n = 0;
@@ -19,6 +19,7 @@ void Linear(const DataBlob *bottom, DataBlob *top,
     top->c = weight->out_plane;
     top->h = 1;
     top->w = 1;
+    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c);
 
     for (n=0;n<bottom->n;n=n+1){
         uint bottom_offset = n*bottom->c; // this code may put outside the loop for improving efficiency further
@@ -33,6 +34,7 @@ void Linear(const DataBlob *bottom, DataBlob *top,
             }
         }
     }
+    MemoryFree(bottom);
 }
 
 

@@ -3,7 +3,7 @@
 #include <math.h>
 #include "utils.h"
 
-void AvgPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
+void AvgPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
     uint n=0, c=0;
     uchar ph=0, pw=0, h=0, w=0;
 
@@ -12,6 +12,7 @@ void AvgPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params
     top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-params->kernel_h)/params->stride_h))+1;
     top->w = (uint)(ceil((float)(bottom->w+2*params->padding_w-params->kernel_w)/params->stride_w))+1;
 
+    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<bottom->c;c=c+1){
             uint bottom_offset = n*bottom->c*bottom->h*bottom->w + c*bottom->h*bottom->w;
@@ -41,7 +42,7 @@ void AvgPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params
             }
         }
     }
-
+    MemoryFree(bottom);
 }
 
 

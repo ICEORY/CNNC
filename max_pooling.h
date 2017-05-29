@@ -3,7 +3,7 @@
 #include <math.h>
 #include "utils.h"
 
-void MaxPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
+void MaxPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
     uint n=0, c=0;
     uchar ph=0, pw=0, h=0, w=0;
 
@@ -11,6 +11,7 @@ void MaxPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params
     top->c = bottom->c;
     top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-params->kernel_h)/params->stride_h))+1;
     top->w = (uint)(ceil((float)(bottom->w+2*params->padding_w-params->kernel_w)/params->stride_w))+1;
+    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);
 
     // main loop
     for (n=0;n<bottom->n;n=n+1){
@@ -39,6 +40,7 @@ void MaxPooling(const DataBlob *bottom, DataBlob *top, const ParamsBlobL *params
             }
         }
     }
+    MemoryFree(bottom);
 }
 
 

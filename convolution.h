@@ -3,7 +3,7 @@
 #include <math.h>
 #include "utils.h"
 
-void Convolution(const DataBlob *bottom, DataBlob *top,
+void Convolution(DataBlob *bottom, DataBlob *top,
                  const WeightBlob *weight, const WeightBlob *bias,
                  const ParamsBlobS *params, const uchar bias_term){
 
@@ -14,6 +14,7 @@ void Convolution(const DataBlob *bottom, DataBlob *top,
     top->c = weight->out_plane;
     top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-weight->kernel_h)/params->stride_h))+1;
     top->w = (uint)(ceil((float)(bottom->w+2*params->padding_w-weight->kernel_w)/params->stride_w))+1;
+    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);
 
     for (n=0;n<bottom->n;n=n+1){
         for (co=0;co<top->c;co=co+1){
@@ -49,6 +50,7 @@ void Convolution(const DataBlob *bottom, DataBlob *top,
             }
         }
     }
+    MemoryFree(bottom);
 }
 
 

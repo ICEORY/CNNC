@@ -7,7 +7,7 @@
 \hat{x} = \frac{x-mean}{\square{var-eps}}
 y = \hat{x}*\gmma+\beta
 */
-void BatchNormalization(const DataBlob *bottom, DataBlob *top,
+void BatchNormalization(DataBlob *bottom, DataBlob *top,
                         const WeightBlob *gamma, const WeightBlob *beta,
                         const WeightBlob *mean, const WeightBlob *var,
                         D_Type scale_factor, const D_Type eps){
@@ -17,10 +17,13 @@ void BatchNormalization(const DataBlob *bottom, DataBlob *top,
         scale_factor = 1/scale_factor;
     }
 
-    top->n = bottom->n;
+    top = bottom;
+/*    top->n = bottom->n;
     top->c = bottom->c;
     top->h = bottom->h;
     top->w = bottom->w;
+
+    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);*/
 
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){
