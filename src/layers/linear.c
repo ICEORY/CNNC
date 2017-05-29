@@ -1,7 +1,6 @@
-#ifndef _LINEAR_H_
-#define _LINEAR_H_
-
+#include "linear.h"
 #include "utils.h"
+#include <stdio.h>
 /**
 input dim: N_i*C_i*1*1
 output dim: N_o*C_o*1*1
@@ -40,7 +39,7 @@ void Linear(DataBlob *bottom, DataBlob *top,
 
 void LinearTest(){
     D_Type input[9] = {1, -2, 3, 4, 5, -3, 4 , 5, 6};
-    DataBlob *bottom = (DataBlob *)malloc(sizeof(DataBlob));
+    DataBlob *bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
     bottom->n = 1;
     bottom->c = 9;
     bottom->h = 1;
@@ -52,14 +51,9 @@ void LinearTest(){
     D_Type bias_data[2] = {-1, 8};
     WeightBlob bias = {1,2,1,1,bias_data};
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
-    uint i= 0;
-    for (i=0;i<1;i++){
-        Linear(bottom, top, &weight, &bias, 1);
-        PrintAll(top);
-    }
+    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
+
+    Linear(bottom, top, &weight, &bias, 1);
+    PrintAll(top);
+    printf("Test Linear Pass\n");
 }
-#endif // _LINEAR_H_

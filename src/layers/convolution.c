@@ -1,7 +1,7 @@
-#ifndef _CONVOLUTION_H_
-#define _CONVOLUTION_H_
-#include <math.h>
+#include "convolution.h"
 #include "utils.h"
+#include <math.h>
+#include <stdio.h>
 
 void Convolution(DataBlob *bottom, DataBlob *top,
                  const WeightBlob *weight, const WeightBlob *bias,
@@ -56,7 +56,7 @@ void Convolution(DataBlob *bottom, DataBlob *top,
 
 void ConvolutionTest(){
     D_Type input[9] = {1, -2, 3, 4, 5, -3, 4 , 5, 6};
-    DataBlob *bottom = (DataBlob *)malloc(sizeof(DataBlob));
+    DataBlob *bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
     bottom->n = 1;
     bottom->c = 1;
     bottom->h = 3;
@@ -69,16 +69,8 @@ void ConvolutionTest(){
     WeightBlob bias = {1,1,1,1,bias_data};
     ParamsBlobS params = {1,1,1,1};
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
-    uint i= 0;
-    for (i=0;i<1000000;i++){
-        Convolution(bottom, top, &weight, &bias, &params, 1);
-        //PrintAll(top);
-    }
+    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
+    Convolution(bottom, top, &weight, &bias, &params, 1);
+    PrintAll(top);
+    printf("Test Convolution Pass\n");
 }
-
-
-#endif // _CONVOLUTION_H_

@@ -1,14 +1,14 @@
-#ifndef _SCALE_H_
-#define _SCALE_H_
-#include <math.h>
+#include "scale.h"
 #include "utils.h"
+#include <math.h>
+#include <stdio.h>
 
 void Scale(DataBlob *bottom, DataBlob *top,
            const WeightBlob *gamma, const WeightBlob *beta){
 
     uint n=0, c=0, h=0, w=0;
 
-    top = bottom;
+    *top = *bottom;
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){
             uint top_offset = n*top->c*top->h*top->w+c*top->h*top->w;
@@ -25,7 +25,7 @@ void Scale(DataBlob *bottom, DataBlob *top,
 
 void ScaleTest(){
     D_Type input[9] = {1, -2, 3, 4, 5, -3, 4 , 5, 6};
-    DataBlob *bottom = (DataBlob *)malloc(sizeof(DataBlob));
+    DataBlob *bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
     bottom->n = 1;
     bottom->c = 1;
     bottom->h = 3;
@@ -37,16 +37,9 @@ void ScaleTest(){
     WeightBlob gamma = {1,1,1,1,gamma_data};
     WeightBlob beta = {1,1,1,1,beta_data};
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
-    uint i= 0;
-    for (i=0;i<1;i++){
-        Scale(bottom, top, &gamma, &beta);
-        PrintAll(top);
-    }
+    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
+
+    Scale(bottom, top, &gamma, &beta);
+    PrintAll(top);
+    printf("Test DataNormalize Pass\n");
 }
-
-
-#endif // _SCALE_H_

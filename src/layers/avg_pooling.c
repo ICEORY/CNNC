@@ -1,7 +1,7 @@
-#ifndef _AVG_POOLING_H_
-#define _AVG_POOLING_H_
-#include <math.h>
+#include "avg_pooling.h"
 #include "utils.h"
+#include <math.h>
+#include <stdio.h>
 
 void AvgPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
     uint n=0, c=0;
@@ -59,13 +59,8 @@ void AvgPoolingTest(){
     D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
     memset(top_memory, 0, sizeof(*top_memory));
     top->data = top_memory;
-    uint i= 0;
     ParamsBlobL params = {3, 3, 1, 1, 1 ,1};
-    for (i=0;i<1;i++){
-        AvgPooling(bottom, top, &params);
-        //PrintAll(top);
-    }
+    AvgPooling(bottom, top, &params);
+    PrintAll(top);
+    printf("Test AvgPooling Pass\n");
 }
-
-
-#endif // _AVG_POOLING_H_

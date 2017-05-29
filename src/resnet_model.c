@@ -1,6 +1,4 @@
-#ifndef _RESNET56_H_
-#define _RESNET56_H_
-#include "utils.h"
+#include "resnet_model.h"
 #include "relu.h"
 #include "avg_pooling.h"
 #include "max_pooling.h"
@@ -10,8 +8,9 @@
 #include "convolution.h"
 #include "concat.h"
 #include "data_transform.h"
-#include "weight_file.h"
 
+#include "weight_file.h"
+#include "utils.h"
 /*
 void ReadWeight(char *file_path, D_Type *data, uint weight_count){
     FILE *fp;
@@ -19,7 +18,7 @@ void ReadWeight(char *file_path, D_Type *data, uint weight_count){
     fread(data, sizeof(D_Type)*weight_count, weight_count, fp);
 }*/
 
-void conv3x3_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, const D_Type *weight_data){
+void conv3x3_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data){
     WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
     weight->in_plane = in_plane;
     weight->out_plane = out_plane;
@@ -37,7 +36,7 @@ void conv3x3_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plan
     Convolution(bottom, top, weight, NULL, params, 0);
 }
 
-void conv1x1_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, const D_Type *weight_data){
+void conv1x1_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data){
     WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
     weight->in_plane = in_plane;
     weight->out_plane = out_plane;
@@ -211,5 +210,3 @@ void ResNet_20(DataBlob *bottom, DataBlob *top, D_Type **weight){
     linear_layer(bottom, temp_top, *(weight+42));
     top = temp_top;
 }
-
-#endif // _RESNET56_H_

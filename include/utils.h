@@ -6,6 +6,8 @@
  */
 #ifndef _UTILS_H_
 #define _UTILS_H_
+
+
 #include <malloc.h>
 #include "string.h"
 
@@ -88,27 +90,27 @@ typedef struct ParamsBlobLarge_{
     uchar stride_w;
 }ParamsBlobL;
 
+/**-----------------------------------------------------------------*/
 /**
 print all data of DataBlob object
+input: target DataBlob data
 */
-void PrintAll(DataBlob *data){
-    uint data_count = data->n*data->c*data->h*data->w;
-    uint i = 0;
-    for (i=0;i<data_count;i=i+1){
-        printf(">>> Data %d: %f\n",i, data->data[i]);
-    }
-}
+void PrintAll(DataBlob*);
 
 /**
 TO DO:
 you need to re-write these two function for more efficient management of memory pool
 */
-void* MemoryPool(uint mem_size){
-    return (void *) malloc(mem_size);
-}
+/**
+assign memory
+input: unsigned int memory_size
+*/
+void* MemoryPool(uint);
 
-void MemoryFree(void *p){
-    free(p);
-}
+/**
+free memory
+input: void *ptr
+*/
+void MemoryFree(void*);
 
 #endif // _UTILS_H_

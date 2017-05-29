@@ -1,7 +1,7 @@
-#ifndef _MAX_POOLING_H_
-#define _MAX_POOLING_H_
-#include <math.h>
+#include "max_pooling.h"
 #include "utils.h"
+#include <math.h>
+#include <stdio.h>
 
 void MaxPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
     uint n=0, c=0;
@@ -53,16 +53,10 @@ void MaxPoolingTest(){
     bottom->w = 3;
     bottom->data = input;
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
-    uint i= 0;
+    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
     ParamsBlobL params = {3, 3, 1, 1, 1 ,1};
-    for (i=0;i<1;i++){
-        MaxPooling(bottom, top, &params);
-        //PrintAll(top);
-    }
+    MaxPooling(bottom, top, &params);
+    PrintAll(top);
+    printf("Test MaxPooling Pass\n");
 }
 
-#endif // _MAX_POOLING_H_

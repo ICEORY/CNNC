@@ -1,8 +1,7 @@
-#ifndef _BATCH_NORMALIZATION_H_
-#define _BATCH_NORMALIZATION_H_
-
+#include "batch_normalization.h"
 #include <math.h>
-#include "utils.h"
+#include <stdio.h>
+
 /**
 \hat{x} = \frac{x-mean}{\square{var-eps}}
 y = \hat{x}*\gmma+\beta
@@ -17,7 +16,7 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
         scale_factor = 1/scale_factor;
     }
 
-    top = bottom;
+    *top = *bottom;
 /*    top->n = bottom->n;
     top->c = bottom->c;
     top->h = bottom->h;
@@ -33,6 +32,7 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
                 for (w=0;w<top->w;w=w+1){
                     uint top_index = top_offset+h*top->w+w;
                     top->data[top_index] = (bottom->data[top_index]-mean->data[c]*scale_factor)*scale+beta->data[c];
+                    //printf("%f\n", top->data[top_index]);
                 }
             }
         }
@@ -41,7 +41,7 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
 
 void BatchNormalizationTest(){
     D_Type input[9] = {1, -2, 3, 4, 5, -3, 4 , 5, 6};
-    DataBlob *bottom = (DataBlob *)malloc(sizeof(DataBlob));
+    DataBlob *bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
     bottom->n = 1;
     bottom->c = 1;
     bottom->h = 3;
@@ -60,14 +60,8 @@ void BatchNormalizationTest(){
     D_Type eps = 0.00001;
 
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
-    uint i= 0;
-    for (i=0;i<1;i++){
-        BatchNormalization(bottom, top, &gamma, &beta, &mean, &var, scale_factor, eps);
-        PrintAll(top);
-    }
+    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
+    BatchNormalization(bottom, top, &gamma, &beta, &mean, &var, scale_factor, eps);
+    PrintAll(top);
+    printf("Test BatchNormalization Pass\n");
 }
-#endif // _BATCH_NORMALIZATION_H_
