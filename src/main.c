@@ -37,25 +37,21 @@
     //ReadDatTest();
  }
 
-/**TO DO:
+/**
+TO DO:
 we develop framework with considering of generation and efficiency.
 you may need to refactoring these codes for more specific applications, i.e. applying on ARM.
+
+We also ignore data preprocessing, and you can define them by yourself.
+
+All these codes can be optimized further.
+
+After All, good luck~~
 */
+
+
 int main(){
     TestAll();
-    /*uint i=0;
-    int *a;
-    a = NULL;
-    int a_sub[3] = {12,56,45};
-    printf("%i\n",a);
-    a = a_sub;
-    printf("%i\n",a);
-    for (i=0;i<3;i=i+1){
-        printf("data%d\n",a[i]);
-        a[i] = 0;
-        printf("..data%d\n",a_sub[i]);
-    }*/
-
     system("Pause");
     return 0;
 }
