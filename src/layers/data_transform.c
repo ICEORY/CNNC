@@ -38,6 +38,7 @@ void CenterCrop(DataBlob *bottom, DataBlob *top, uint crop_h, uint crop_w){
 void DataNormalize(DataBlob *bottom, DataBlob *top, const D_Type *mean, const D_Type *std_dev){
     uint n=0, c=0, h=0, w=0;
 
+    MemoryFree(top);
     *top = *bottom;
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){

@@ -60,17 +60,18 @@ void batch_norm_layer(DataBlob *bottom, DataBlob *top, const D_Type* weight_data
     D_Type *buffer;
     buffer = weight_data;
 
-    WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-    gamma->data = buffer;
-    WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-    beta->data = buffer+bottom->c;
     WeightBlob *mean = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-    mean->data = buffer+2*bottom->c;
+    mean->data = buffer;
     WeightBlob *var = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-    var->data = buffer+3*bottom->c;
+    var->data = buffer+bottom->c;
+    WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    gamma->data = buffer+2*bottom->c;
+    WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    beta->data = buffer+3*bottom->c;
+
 
     D_Type *scale_factor = buffer+4*bottom->c;
-    BatchNormalization(bottom, top, gamma, beta, mean, var, *scale_factor, eps);
+    BatchNormalization(bottom, top, mean, var, gamma, beta, *scale_factor, eps);
 }
 
 void linear_layer (DataBlob *bottom, DataBlob *top, D_Type* weight_data){

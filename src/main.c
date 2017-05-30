@@ -20,6 +20,7 @@
  #include "readfile.h"
 
  #include "net_generator.h"
+ #include "net_solver.h"
 
  void TestAll(){
     AvgPoolingTest();
@@ -33,7 +34,7 @@
     MaxPoolingTest();
     ReLUTest();
     ScaleTest();
-    ReadDatTest();
+    //ReadDatTest();
  }
 
 /**TO DO:
@@ -41,8 +42,8 @@ we develop framework with considering of generation and efficiency.
 you may need to refactoring these codes for more specific applications, i.e. applying on ARM.
 */
 int main(){
-    //TestAll();
-    uint i=0;
+    TestAll();
+    /*uint i=0;
     int *a;
     a = NULL;
     int a_sub[3] = {12,56,45};
@@ -53,7 +54,7 @@ int main(){
         printf("data%d\n",a[i]);
         a[i] = 0;
         printf("..data%d\n",a_sub[i]);
-    }
+    }*/
 
     system("Pause");
     return 0;

@@ -7,7 +7,7 @@
 net describe file format:
 
 convoludion:
-format: net_type, layer_id, top_layer, in_plane, out_plane, kernel_h, kernel_w, stride_h, stride_w, padding_h, padding_w, bias_term
+format: net_type, layer_id, top_layer, in_plane, out_plane, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w,  bias_term
 length: 12
 
 batch normalization:
@@ -19,12 +19,12 @@ format: net_type, layer_id, top_layer
 length: 3
 
 avg pooling:
-format: net_type, layer_id, top_layer, stride_h, stride_w, padding_h, padding_w
-length: 7
+format: net_type, layer_id, top_layer, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w
+length: 9
 
 max pooling:
-format: net_type, layer_id, top_layer, stride_h, stride_w, padding_h, padding_w
-length: 7
+format: net_type, layer_id, top_layer, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w
+length: 9
 
 linear:
 format: net_type, layer_id, top_layer, in_plane, out_plane, bias_term
@@ -101,7 +101,7 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
 
         switch(net_type){
             case NID_AVG_POOLING:
-                net_node->params_num = 4;
+                net_node->params_num = 6;
                 break;
 
             case NID_BATCH_NORMALIZATION:
@@ -132,7 +132,7 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
                 break;
 
             case NID_MAX_POOLING:
-                net_node->params_num = 4;
+                net_node->params_num = 6;
                 break;
 
             case NID_RELU:

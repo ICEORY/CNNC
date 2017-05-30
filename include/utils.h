@@ -17,6 +17,8 @@
 
 #define max(a,b) ((a>b)?a:b)
 #define min(a,b) ((a<b)?a:b)
+
+#define BN_EPS 0.00001
 //#define NULL (void*)0
 
 /**

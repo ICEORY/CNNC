@@ -8,6 +8,7 @@ void Scale(DataBlob *bottom, DataBlob *top,
 
     uint n=0, c=0, h=0, w=0;
 
+    MemoryFree(top);
     *top = *bottom;
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){

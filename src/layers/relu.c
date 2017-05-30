@@ -11,7 +11,7 @@ void ReLU(DataBlob *bottom, DataBlob *top){
 
     uint top_count = bottom->n * bottom->c * bottom->h * bottom->w;
     uint i =0;
-
+    MemoryFree(top);
     *top = *bottom;
     for (i=0;i<top_count;i=i+1){
         if (top->data[i]<0){

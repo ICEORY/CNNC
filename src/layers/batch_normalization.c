@@ -7,8 +7,8 @@
 y = \hat{x}*\gmma+\beta
 */
 void BatchNormalization(DataBlob *bottom, DataBlob *top,
-                        const WeightBlob *gamma, const WeightBlob *beta,
                         const WeightBlob *mean, const WeightBlob *var,
+                        const WeightBlob *gamma, const WeightBlob *beta,
                         D_Type scale_factor, const D_Type eps){
     uint n=0, c=0, h=0, w=0;
 
@@ -16,8 +16,9 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
         scale_factor = 1/scale_factor;
     }
 
+    MemoryFree(top);
     *top = *bottom;
-/*    top->n = bottom->n;
+/*  top->n = bottom->n;
     top->c = bottom->c;
     top->h = bottom->h;
     top->w = bottom->w;
@@ -59,9 +60,8 @@ void BatchNormalizationTest(){
     D_Type scale_factor = 9999.8;
     D_Type eps = 0.00001;
 
-
     DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    BatchNormalization(bottom, top, &gamma, &beta, &mean, &var, scale_factor, eps);
+    BatchNormalization(bottom, top, &mean, &var, &gamma, &beta, scale_factor, eps);
     PrintAll(top);
     printf("Test BatchNormalization Pass\n");
 }

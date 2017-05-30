@@ -4,7 +4,7 @@
 void ConcatTable(DataBlob *bottom, DataBlob *top_1, DataBlob *top_2){
     uint top_count = bottom->n * bottom->c * bottom->h * bottom->w;
     uint i =0;
-
+    MemoryFree(top_1);
     *top_1 = *bottom;
 
     top_2->n = bottom->n;
@@ -22,7 +22,7 @@ void ConcatTable(DataBlob *bottom, DataBlob *top_1, DataBlob *top_2){
 void CAddTable(DataBlob *bottom_1, DataBlob *bottom_2, DataBlob *top){
     uint top_count = bottom_1->n * bottom_1->c * bottom_1->h * bottom_1->w;
     uint i =0;
-
+    MemoryFree(top);
     *top = *bottom_1;
     for (i=0;i<top_count;i=i+1){
         top->data[i] = bottom_1->data[i]+bottom_2->data[i];

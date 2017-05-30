@@ -5,13 +5,13 @@
 /**
 batch normalization layer
 input:  DataBlob *bottom, DataBlob *top,
-        const WeightBlob *gamma, const WeightBlob *beta,
         const WeightBlob *mean, const WeightBlob *var,
+        const WeightBlob *gamma, const WeightBlob *beta,
         D_Type scale_factor, const D_Type eps
 */
 void BatchNormalization(DataBlob *bottom, DataBlob *top,
-                        const WeightBlob *gamma, const WeightBlob *beta,
                         const WeightBlob *mean, const WeightBlob *var,
+                        const WeightBlob *gamma, const WeightBlob *beta,
                         D_Type scale_factor, const D_Type eps);
 
 
