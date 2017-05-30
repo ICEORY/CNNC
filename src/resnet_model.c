@@ -1,15 +1,16 @@
 #include "resnet_model.h"
-#include "relu.h"
-#include "avg_pooling.h"
-#include "max_pooling.h"
-#include "scale.h"
-#include "batch_normalization.h"
-#include "linear.h"
-#include "convolution.h"
-#include "concat.h"
-#include "data_transform.h"
 
+#include "avg_pooling.h"
+#include "batch_normalization.h"
+#include "concat.h"
+#include "convolution.h"
+#include "data_transform.h"
+#include "linear.h"
+#include "max_pooling.h"
+#include "relu.h"
+#include "scale.h"
 #include "weight_file.h"
+
 #include "utils.h"
 /*
 void ReadWeight(char *file_path, D_Type *data, uint weight_count){
