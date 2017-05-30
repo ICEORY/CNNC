@@ -40,15 +40,8 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         WeightBlob *var = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         var->data = node->weight+node->params[0];
 
-        WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-        gamma->data = node->weight+2*node->params[0];
-
-        WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-        beta->data = node->weight+3*node->params[0];
-
-
-        D_Type *scale_factor = node->weight+4*node->params[0];
-        BatchNormalization(bottom, top, mean, var, gamma, beta, scale_factor[0], BN_EPS);
+        D_Type *scale_factor = node->weight+2*node->params[0];
+        BatchNormalization(bottom, top, mean, var, scale_factor[0], BN_EPS);
         *bottom = *top;
         top = (DataBlob*)MemoryPool(sizeof(DataBlob));
         if (node->node_num == 1){
@@ -56,12 +49,8 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         }
         MemoryFree(mean->data);
         MemoryFree(var->data);
-        MemoryFree(gamma->data);
-        MemoryFree(beta->data);
         MemoryFree(mean);
         MemoryFree(var);
-        MemoryFree(gamma);
-        MemoryFree(beta);
     }
 
     //if (node->net_type == NID_CADDTABLE){
@@ -201,9 +190,17 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
     if (node->net_type == NID_SCALE){
         WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         gamma->data = node->weight;
-        WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-        beta->data = node->weight+node->params[0];
-        Scale(bottom, top, gamma, beta);
+        uchar bias_term = node->params[1];
+        WeightBlob *beta;
+        if (bias_term){
+            beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+            beta->data = node->weight+node->params[0];
+        }
+        else{
+            beta = NULL;
+        }
+
+        Scale(bottom, top, gamma, beta, bias_term);
 
         *bottom = *top;
         top = (DataBlob*)MemoryPool(sizeof(DataBlob));

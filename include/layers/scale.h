@@ -6,10 +6,10 @@
 /**
 scale layer
 input:  DataBlob *bottom, DataBlob *top,
-        const WeightBlob *gamma, const WeightBlob *beta
+        const WeightBlob *gamma, const WeightBlob *beta, const uchar bias_term
 */
 void Scale(DataBlob *bottom, DataBlob *top,
-           const WeightBlob *gamma, const WeightBlob *beta);
+           const WeightBlob *gamma, const WeightBlob *beta, const uchar bias_term);
 
 /**
 test scale layer

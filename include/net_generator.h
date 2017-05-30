@@ -72,8 +72,8 @@ format: net_type, layer_id, top_layer, in_plane, out_plane, bias_term
 length: 6
 
 scale:
-format: net_type, layer_id, top_layer, in_plane
-length: 4
+format: net_type, layer_id, top_layer, in_plane, bias_term
+length: 5
 
 caddtable:
 format: net_type, layer_id, top_layer
@@ -110,7 +110,7 @@ convolution:
 weight (in_plane*out_plane*kernel_h*kernel_w), bias(0 or out_plane)
 
 batch normalization:
-mean(in_plane), var(in_plane), gamma(in_plane), beta(in_plane), scale_factor(1)
+mean(in_plane), var(in_plane), scale_factor(1)
 
 relu: non
 
@@ -122,7 +122,7 @@ linear:
 weight(in_plane*out_plane), bias(0 or out_plane)
 
 scale:
-gamma(in_plane), beta(in_plane)
+gamma(in_plane), beta(0 or in_plane)
 
 caddtable: none
 

@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 void Scale(DataBlob *bottom, DataBlob *top,
-           const WeightBlob *gamma, const WeightBlob *beta){
+           const WeightBlob *gamma, const WeightBlob *beta, const uchar bias_term){
 
     uint n=0, c=0, h=0, w=0;
 
@@ -16,7 +16,13 @@ void Scale(DataBlob *bottom, DataBlob *top,
             for (h=0;h<top->h;h=h+1){
                 for (w=0;w<top->w;w=w+1){
                     uint top_index = top_offset+h*top->w+w;
-                    top->data[top_index] = bottom->data[top_index]*gamma->data[c]+beta->data[c];
+                    if (bias_term){
+                        top->data[top_index] = bottom->data[top_index]*gamma->data[c]+beta->data[c];
+                    }
+                    else{
+                        top->data[top_index] = bottom->data[top_index]*gamma->data[c];
+                    }
+
                 }
             }
         }
@@ -40,7 +46,7 @@ void ScaleTest(){
 
     DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
 
-    Scale(bottom, top, &gamma, &beta);
+    Scale(bottom, top, &gamma, &beta, 1);
     PrintAll(top);
     printf("Test DataNormalize Pass\n");
 }
