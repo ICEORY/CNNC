@@ -3,10 +3,11 @@
 #include <math.h>
 #include <stdio.h>
 
-void MaxPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
+DataBlob* MaxPooling(DataBlob *bottom, const ParamsBlobL *params){
     uint n=0, c=0;
     uchar ph=0, pw=0, h=0, w=0;
 
+    DataBlob *top = (DataBlob*)MemoryPool(sizeof(DataBlob));
     top->n = bottom->n;
     top->c = bottom->c;
     top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-params->kernel_h)/params->stride_h))+1;
@@ -40,7 +41,9 @@ void MaxPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
             }
         }
     }
+    MemoryFree(bottom->data);
     MemoryFree(bottom);
+    return top;
 }
 
 
@@ -53,9 +56,9 @@ void MaxPoolingTest(){
     bottom->w = 3;
     bottom->data = input;
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
+
     ParamsBlobL params = {3, 3, 1, 1, 1 ,1};
-    MaxPooling(bottom, top, &params);
+    DataBlob *top = MaxPooling(bottom, &params);
     PrintAll(top);
     printf("Test MaxPooling Pass\n");
 }

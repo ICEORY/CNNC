@@ -80,10 +80,11 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
     node_list->node_len = ReadDatChar(fp);
     node_list->node_list = (LayerNode**)MemoryPool(sizeof(LayerNode*)*(node_list->node_len));
     uchar net_type = 0;
+    printf("node length:%d\n", node_list->node_len);
     while(!feof(fp)){
         net_type = ReadDatChar(fp);
         LayerNode *net_node = (LayerNode*)MemoryPool(sizeof(LayerNode));
-        short *params;
+        uint *params;
         net_node->net_type = net_type;
 
         net_node->top_1 = NULL;
@@ -94,6 +95,7 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
 
         net_node->layer_id = ReadDatChar(fp);
         net_node->top_1_id = ReadDatChar(fp);
+        //printf("net type:%d, layer_id:%d, top_1:%d", net_node->net_type, net_node->layer_id, net_node->top_1_id);
 
         if (net_node->top_1_id >= node_list->node_len){
             net_node->node_num = 0;
@@ -114,9 +116,9 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
 
             case NID_CONCATTABLE:
                 net_node->top_2_id = ReadDatChar(fp);
+                //printf("top_2: %d ", net_node->top_2_id);
                 net_node->node_num = 2;
                 net_node->params_num = 0;
-
                 break;
 
             case NID_CONVOLUTION:
@@ -147,13 +149,18 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
             default: break;
         }
 
-        params = (short*)MemoryPool(sizeof(short)*net_node->params_num);
+        params = (uint*)MemoryPool(sizeof(uint)*net_node->params_num);
         for (i=0;i<net_node->params_num;i=i+1){
-            params[i] = (short)ReadDatUInt(fp);
+            params[i] = ReadDatUInt(fp);
+            //printf(" %d ", params[i]);
         }
+        net_node->params = params;
         node_list->node_list[net_node->layer_id] = net_node;
+        //printf("=========================\n");
     }
     fclose(fp);
+    //printf(">>>parse network done! #node=%d\n", node_list->node_len);
+    //system("pause");
 }
 /**
 link all nodes
@@ -166,15 +173,21 @@ void LinkNode(LayerNodeList *node_list){
     uchar node_num = 0;
     for (i=0;i<node_list->node_len;i=i+1){
         node_num = node_list->node_list[i]->node_num;
+        //printf("#top node%d\n", node_num);
         switch (node_num){
             case 1:
-                node_list->node_list[i]->top_1 = node_list->node_list[node_list->node_list[i]->top_1_id];break;
+                node_list->node_list[i]->top_1 = node_list->node_list[node_list->node_list[i]->top_1_id];
+                //printf("next node:%d\n", node_list->node_list[i]->top_1_id);
+                break;
             case 2:
-                node_list->node_list[i]->top_1 = node_list->node_list[node_list->node_list[i]->top_1_id];break;
-                node_list->node_list[i]->top_2 = node_list->node_list[node_list->node_list[i]->top_2_id];break;
+                node_list->node_list[i]->top_1 = node_list->node_list[node_list->node_list[i]->top_1_id];
+                node_list->node_list[i]->top_2 = node_list->node_list[node_list->node_list[i]->top_2_id];
+                //printf("next node_1:%d, node_2:%d\n", node_list->node_list[i]->top_1_id, node_list->node_list[i]->top_2_id);
+                break;
             default: break;
         }
     }
+    //system("pause");
 }
 
 /**
@@ -189,11 +202,16 @@ void WeightFileParse(char *file_path, LayerNodeList *node_list){
     while(!feof(fp)){
         layer_id = ReadDatChar(fp);
         data_len = ReadDatUInt(fp);
+        //printf("layer_id:%d\t data_len:%d\t", layer_id, data_len);
         node_list->node_list[layer_id]->weight = (D_Type*)MemoryPool(sizeof(D_Type)*data_len);
         for (i=0;i<data_len;i=i+1){
             node_list->node_list[layer_id]->weight[i] = ReadDatDType(fp);
+            //printf("%f\t", node_list->node_list[layer_id]->weight[i]);
         }
+        //printf("\n");
     }
+    fclose(fp);
+    //system("pause");
 }
 
 

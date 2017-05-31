@@ -5,14 +5,16 @@
 /**
 center crop:
 input: DataBlob *bottom, DataBlob *top, uint crop_h, uint crop_w
+return: top feature maps
 */
-void CenterCrop(DataBlob *bottom, DataBlob *top, uint crop_h, uint crop_w);
+DataBlob* CenterCrop(DataBlob *bottom, uint crop_h, uint crop_w);
 
 /**
 normalize:
 input: DataBlob *bottom, DataBlob *top, const D_Type *mean, const D_Type *std_dev
+return: top feature maps
 */
-void DataNormalize(DataBlob *bottom, DataBlob *top, const D_Type *mean, const D_Type *std_dev);
+DataBlob* DataNormalize(DataBlob *bottom, const D_Type *mean, const D_Type *std_dev);
 
 /**
 test center crop function

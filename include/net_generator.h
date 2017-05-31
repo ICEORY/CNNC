@@ -14,7 +14,7 @@ typedef struct LayerNode_{
     uchar layer_id;
 
     uchar params_num;
-    short *params;
+    uint *params;
 
     uchar node_num;
     uchar top_1_id;

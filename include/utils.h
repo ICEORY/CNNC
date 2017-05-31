@@ -107,7 +107,7 @@ you need to re-write these two function for more efficient management of memory 
 assign memory
 input: unsigned int memory_size
 */
-void* MemoryPool(uint);
+void* MemoryPool(long);
 
 /**
 free memory

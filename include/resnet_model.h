@@ -11,33 +11,51 @@ void ReadWeight(char *file_path, D_Type *data, uint weight_count){
 /**
 wrapper of convolutional layer, kernel_size is 3x3
 */
-void conv3x3_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data);
+DataBlob* conv3x3_layer(DataBlob *bottom, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data);
 
 /**
 wrapper of convolutional layer, kernel_size is 1x1
 */
-void conv1x1_layer(DataBlob *bottom, DataBlob *top, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data);
+DataBlob* conv1x1_layer(DataBlob *bottom, uint in_plane, uint out_plane, uchar stride, D_Type *weight_data);
 
 /**
 wrapper of batch_norm_layer layer
 */
-void batch_norm_layer(DataBlob *bottom, DataBlob *top, const D_Type* weight_data);
+DataBlob* batch_norm_layer(DataBlob *bottom, D_Type* weight_data);
+
+/**
+wrapper of scale layer
+*/
+DataBlob* scale_layer(DataBlob *bottom, D_Type* weight_data);
 
 /**
 wrapper of linear layer
 */
-void linear_layer (DataBlob *bottom, DataBlob *top, D_Type* weight_data);
+DataBlob* linear_layer (DataBlob *bottom, D_Type* weight_data);
+
+/**
+wrapper of avg pooling layer
+*/
+DataBlob* avg_pooling_layer(DataBlob *bottom);
 
 /**
 wrapper of residual branch
 */
-void ResidualBranch(DataBlob *bottom, DataBlob *top,
+DataBlob* ResidualBranch(DataBlob *bottom,
                     uint in_plane, uint out_plane, uchar stride,
-                    D_Type **weight);
+                    D_Type **weight, uchar ptr_offset);
 
+/**
+wrapper of residual block
+*/
+DataBlob* ResidualBlock(DataBlob *bottom, uint in_plane, uint out_plane, D_Type **weight, uchar down_sample_term, uchar ptr_offset);
 /**
 define resnet 20
 */
-void ResNet_20(DataBlob *bottom, DataBlob *top, D_Type **weight);
+DataBlob* ResNet_20(DataBlob *bottom, D_Type **weight);
 
+/**
+test resnet 20
+*/
+void resnet20test();
 #endif // _RESNET_MODEL_H_

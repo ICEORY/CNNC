@@ -16,7 +16,7 @@
  #include "relu.h"
  #include "scale.h"
 
- //#include "resnet_model.h"
+ #include "resnet_model.h"
  #include "readfile.h"
 
  #include "net_generator.h"
@@ -34,7 +34,7 @@
     MaxPoolingTest();
     ReLUTest();
     ScaleTest();
-    //ReadDatTest();
+    ReadDatTest();
  }
 
 /**
@@ -51,8 +51,15 @@ After All, good luck~~
 
 
 int main(){
-    TestAll();
-    system("Pause");
+    //ConvolutionTest();
+    //TestAll();
+    //ReadDatTest();
+    //uint i = 0;
+    //for (i=0;i<1;i=i+1){
+    //    NetWorkTest();
+    //}
+    //system("Pause");
+    //AvgPoolingTest();
     return 0;
 }
 

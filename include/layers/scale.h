@@ -7,8 +7,9 @@
 scale layer
 input:  DataBlob *bottom, DataBlob *top,
         const WeightBlob *gamma, const WeightBlob *beta, const uchar bias_term
+return: top feature maps
 */
-void Scale(DataBlob *bottom, DataBlob *top,
+DataBlob* Scale(DataBlob *bottom,
            const WeightBlob *gamma, const WeightBlob *beta, const uchar bias_term);
 
 /**

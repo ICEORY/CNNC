@@ -6,8 +6,9 @@
 /**
 Max Pooling Layer
 input: DataBlob *bottom, DataBlob *top, const ParamsBlobL *params
+return: top feature maps
 */
-void MaxPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params);
+DataBlob* MaxPooling(DataBlob *bottom, const ParamsBlobL *params);
 
 /**
 test max pooling layer

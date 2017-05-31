@@ -1,33 +1,36 @@
 #include "concat.h"
 #include "utils.h"
 #include <stdio.h>
-void ConcatTable(DataBlob *bottom, DataBlob *top_1, DataBlob *top_2){
+DataBlob* ConcatTable(DataBlob *bottom, DataBlob *top_2){
     uint top_count = bottom->n * bottom->c * bottom->h * bottom->w;
     uint i =0;
-    MemoryFree(top_1);
-    *top_1 = *bottom;
 
+    DataBlob *top_1 = bottom;
     top_2->n = bottom->n;
     top_2->c = bottom->c;
     top_2->h = bottom->h;
     top_2->w = bottom->w;
     top_2->data = (D_Type*)MemoryPool(sizeof(D_Type)*bottom->n*bottom->c*bottom->h*bottom->w);
-
+    //printf(">>>concat table: n:%d, c:%d, h:%d, w:%d\n",top_1->n, top_1->c, top_1->h, top_1->w);
+    //printf(">>>concat table: n:%d, c:%d, h:%d, w:%d\n",top_2->n, top_2->c, top_2->h, top_2->w);
     for (i=0;i<top_count;i=i+1){
         top_2->data[i] = bottom->data[i];
     }
-
+    return top_1;
 }
 
-void CAddTable(DataBlob *bottom_1, DataBlob *bottom_2, DataBlob *top){
+DataBlob *CAddTable(DataBlob *bottom_1, DataBlob *bottom_2){
     uint top_count = bottom_1->n * bottom_1->c * bottom_1->h * bottom_1->w;
+    //printf(">>>add table: n:%d, c:%d, h:%d, w:%d\n",bottom_1->n, bottom_1->c, bottom_1->h, bottom_1->w);
+    //printf(">>>add table: n:%d, c:%d, h:%d, w:%d\n",bottom_2->n, bottom_2->c, bottom_2->h, bottom_2->w);
     uint i =0;
-    MemoryFree(top);
-    *top = *bottom_1;
+    DataBlob *top = bottom_1;
     for (i=0;i<top_count;i=i+1){
         top->data[i] = bottom_1->data[i]+bottom_2->data[i];
     }
+    MemoryFree(bottom_2->data);
     MemoryFree(bottom_2);
+    return top;
 }
 
 void ConcatTableTest(){
@@ -39,9 +42,8 @@ void ConcatTableTest(){
     bottom->w = 3;
     bottom->data = input;
 
-    DataBlob *top_1 = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    DataBlob *top_2 = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    ConcatTable(bottom, top_1, top_2);
+    DataBlob *top_2 = (DataBlob*)MemoryPool(sizeof(DataBlob));
+    DataBlob* top_1 = ConcatTable(bottom, top_2);
     PrintAll(top_1);
     PrintAll(top_2);
     printf("Test ConcatTable Pass\n");
@@ -64,8 +66,7 @@ void CAddTableTest(){
     bottom_2->w = 3;
     bottom_2->data = input_2;
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    CAddTable(bottom_1, bottom_2, top);
+    DataBlob *top = CAddTable(bottom_1, bottom_2);
     PrintAll(top);
     printf("Test CAddTable Pass\n");
 }

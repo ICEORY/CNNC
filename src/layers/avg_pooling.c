@@ -3,10 +3,11 @@
 #include <math.h>
 #include <stdio.h>
 
-void AvgPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
+DataBlob* AvgPooling(DataBlob *bottom, const ParamsBlobL *params){
     uint n=0, c=0;
     uchar ph=0, pw=0, h=0, w=0;
 
+    DataBlob *top = (DataBlob*)MemoryPool(sizeof(DataBlob));
     top->n = bottom->n;
     top->c = bottom->c;
     top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-params->kernel_h)/params->stride_h))+1;
@@ -42,7 +43,10 @@ void AvgPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params){
             }
         }
     }
+    MemoryFree(bottom->data);
     MemoryFree(bottom);
+    //printf(">>>n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    return top;
 }
 
 
@@ -55,12 +59,8 @@ void AvgPoolingTest(){
     bottom->w = 3;
     bottom->data = input;
 
-    DataBlob *top = (DataBlob *)malloc(sizeof(DataBlob));
-    D_Type *top_memory = (D_Type*)malloc(sizeof(D_Type)*9);
-    memset(top_memory, 0, sizeof(*top_memory));
-    top->data = top_memory;
     ParamsBlobL params = {3, 3, 1, 1, 1 ,1};
-    AvgPooling(bottom, top, &params);
+    DataBlob *top = AvgPooling(bottom, &params);
     PrintAll(top);
     printf("Test AvgPooling Pass\n");
 }

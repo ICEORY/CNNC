@@ -7,8 +7,9 @@ batch normalization layer
 input:  DataBlob *bottom, DataBlob *top,
         const WeightBlob *mean, const WeightBlob *var,
         D_Type scale_factor, const D_Type eps
+return: output feature maps
 */
-void BatchNormalization(DataBlob *bottom, DataBlob *top,
+DataBlob* BatchNormalization(DataBlob *bottom,
                         const WeightBlob *mean, const WeightBlob *var,
                         D_Type scale_factor, const D_Type eps);
 

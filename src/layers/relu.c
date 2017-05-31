@@ -7,17 +7,19 @@
 ReLU: y = max(x,0);
 */
 
-void ReLU(DataBlob *bottom, DataBlob *top){
+DataBlob* ReLU(DataBlob *bottom){
 
     uint top_count = bottom->n * bottom->c * bottom->h * bottom->w;
     uint i =0;
-    MemoryFree(top);
-    *top = *bottom;
+    DataBlob *top = bottom;
     for (i=0;i<top_count;i=i+1){
         if (top->data[i]<0){
             top->data[i] = 0;
         }
     }
+    //printf(">>>relu: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    return top;
+
 }
 
 
@@ -33,11 +35,7 @@ void ReLUTest(){
     bottom->w = 3;
     bottom->data = input;
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    //D_Type *top_memory = (D_Type*)MemoryPool(sizeof(D_Type)*9);
-    //memset(top_memory, 0, sizeof(*top_memory));
-    //top->data = top_memory;
-    ReLU(bottom, top);
+    DataBlob *top = ReLU(bottom);
     PrintAll(top);
     printf("ReLUTest Pass\n");
 }

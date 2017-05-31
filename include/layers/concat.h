@@ -5,15 +5,17 @@
 
 /**
 ConcatTable Layer:
-input:  DataBlob *bottom, DataBlob *top_1, DataBlob *top_2
+input:  DataBlob *bottom,  DataBlob *top_2 (top_2 here is only a pointer, without initialized, and it will be modified on the function)
+return: top_1 feature maps, top_2 feature maps are modified, too.
 */
-void ConcatTable(DataBlob *bottom, DataBlob *top_1, DataBlob *top_2);
+DataBlob* ConcatTable(DataBlob *bottom, DataBlob *top_2);
 
 /**
 CAddTable Layer
 input:  DataBlob *bottom_1, DataBlob *bottom_2, DataBlob *top
+return: output feature maps
 */
-void CAddTable(DataBlob *bottom_1, DataBlob *bottom_2, DataBlob *top);
+DataBlob* CAddTable(DataBlob *bottom_1, DataBlob *bottom_2);
 
 /**
 Test ConcatTable Layer

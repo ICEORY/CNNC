@@ -6,7 +6,7 @@
 \hat{x} = \frac{x-mean}{\square{var-eps}}
 y = \hat{x}*\gmma+\beta
 */
-void BatchNormalization(DataBlob *bottom, DataBlob *top,
+DataBlob* BatchNormalization(DataBlob *bottom,
                         const WeightBlob *mean, const WeightBlob *var,
                         D_Type scale_factor, const D_Type eps){
     uint n=0, c=0, h=0, w=0;
@@ -14,15 +14,7 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
     if (scale_factor != 0){
         scale_factor = 1/scale_factor;
     }
-
-    MemoryFree(top);
-    *top = *bottom;
-/*  top->n = bottom->n;
-    top->c = bottom->c;
-    top->h = bottom->h;
-    top->w = bottom->w;
-
-    top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);*/
+    DataBlob *top = bottom;
 
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){
@@ -32,11 +24,12 @@ void BatchNormalization(DataBlob *bottom, DataBlob *top,
                 for (w=0;w<top->w;w=w+1){
                     uint top_index = top_offset+h*top->w+w;
                     top->data[top_index] = (bottom->data[top_index]-mean->data[c]*scale_factor)*scale;
-                    //printf("%f\n", top->data[top_index]);
                 }
             }
         }
     }
+    //printf(">>>batch norm: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    return top;
 }
 
 void BatchNormalizationTest(){
@@ -55,8 +48,7 @@ void BatchNormalizationTest(){
     D_Type scale_factor = 9999.8;
     D_Type eps = 0.00001;
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    BatchNormalization(bottom, top, &mean, &var, scale_factor, eps);
+    DataBlob *top = BatchNormalization(bottom, &mean, &var, scale_factor, eps);
     PrintAll(top);
     printf("Test BatchNormalization Pass\n");
 }

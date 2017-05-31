@@ -12,10 +12,13 @@
 #include "scale.h"
 
 #include "utils.h"
+#include <stdio.h>
 
-LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
+DataBlob* NodeRun(const LayerNode *node, DataBlob *bottom){
+    DataBlob *top;
     if (node->net_type == NID_AVG_POOLING)
     {
+        //printf(">>>Enter avg pooling:%d\n", node->layer_id);
         ParamsBlobL *params = (ParamsBlobL*)MemoryPool(sizeof(ParamsBlobL));
         params->kernel_h = node->params[0];
         params->kernel_w = node->params[1];
@@ -24,16 +27,18 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         params->stride_h = node->params[4];
         params->stride_w = node->params[5];
 
-        AvgPooling(bottom, top, params);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
+        top = AvgPooling(bottom, params);
+
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
         MemoryFree(params);
+        return top;
     }
 
     if (node->net_type == NID_BATCH_NORMALIZATION){
+        //printf(">>>Enter batch norm:%d\n", node->layer_id);
         WeightBlob *mean = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         mean->data = node->weight;
 
@@ -41,47 +46,50 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         var->data = node->weight+node->params[0];
 
         D_Type *scale_factor = node->weight+2*node->params[0];
-        BatchNormalization(bottom, top, mean, var, scale_factor[0], BN_EPS);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
+        top = BatchNormalization(bottom, mean, var, scale_factor[0], BN_EPS);
+
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
-        MemoryFree(mean->data);
-        MemoryFree(var->data);
         MemoryFree(mean);
         MemoryFree(var);
+        return top;
     }
 
-    //if (node->net_type == NID_CADDTABLE){
-        // do nothing
-    //}
-
     if (node->net_type == NID_CONCATTABLE){
-        DataBlob *top_1 = (DataBlob*)MemoryPool(sizeof(DataBlob));
+        //printf(">>>Enter concat table:%d\n", node->layer_id);
         DataBlob *top_2 = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        ConcatTable(bottom, top_1, top_2);
-        DataBlob *bottom_1 = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        *bottom_1 = *top_1;
-        DataBlob *bottom_2 = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        bottom_2 = top_2;
-        top_1 = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        top_2 = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        NodeRun(node->top_1, bottom_1, top_1);
-        LayerNode *merge_node = NodeRun(node->top_2, bottom_2, top_2);
-        *bottom_1 = *top_1;
-        *bottom_2 = *top_2;
-        CAddTable(bottom_1, bottom_2, top);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        if (merge_node->node_num == 1){
-            NodeRun(merge_node, bottom, top);
+        DataBlob *top_1 = ConcatTable(bottom, top_2);
+
+        DataBlob *bottom_1 = top_1;
+        DataBlob *bottom_2 = top_2;
+
+        top_1 = NodeRun(node->top_1, bottom_1);
+        top_2 = NodeRun(node->top_2, bottom_2);
+
+        LayerNode *merge_node = (LayerNode*)MemoryPool(sizeof(LayerNode));
+        *merge_node = *node;
+        while(merge_node->net_type != NID_CADDTABLE){
+            //printf("next net_type is:%d\n",merge_node->net_type);
+            merge_node = merge_node->top_1;
         }
+        bottom_1 = top_1;
+        bottom_2 = top_2;
+        top = CAddTable(bottom_1, bottom_2);
+
+        if (merge_node!=NULL && merge_node->node_num == 1){
+            bottom = top;
+            top = NodeRun(merge_node->top_1, bottom);
+        }
+        free(merge_node);
+        return top;
     }
 
     if (node->net_type == NID_CONVOLUTION){
-
+        //printf(">>>Enter convolution:%d\n", node->layer_id);
         WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+        //printf("===>params num: %d\n", node->params_num);
         weight->data = node->weight;
         weight->in_plane = node->params[0];
         weight->out_plane = node->params[1];
@@ -104,31 +112,32 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         else{
             bias = NULL;
         }
+        //printf(">>>convolution: n:%d, c:%d, h:%d, w:%d\n",bottom->n, bottom->c, bottom->h, bottom->w);
+        top = Convolution(bottom, weight, bias, params, bias_term);
 
-        Convolution(bottom, top, weight, bias, params, bias_term);
-
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
         MemoryFree(params);
-        MemoryFree(weight->data);
         MemoryFree(weight);
         if(bias_term){
-            MemoryFree(bias->data);
             MemoryFree(bias);
         }
+        return top;
     }
 
     if (node->net_type == NID_DATA_LAYER){
+        //printf(">>>Enter data:%d\n", node->layer_id);
         // you can add preprocessing program here
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            top = NodeRun(node->top_1, bottom);
         }
+        return top;
     }
 
     if (node->net_type == NID_LINEAR){
+        //printf(">>>Enter linear:%d\n", node->layer_id);
         WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         weight->data = node->weight;
         weight->in_plane = node->params[0];
@@ -145,22 +154,23 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         else{
             bias = NULL;
         }
-        Linear(bottom, top, weight, bias, bias_term);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
-        if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
-        }
+        top = Linear(bottom, weight, bias, bias_term);
 
-        MemoryFree(weight->data);
+        if (node->node_num == 1){
+            //printf("linear layer enter final point\n");
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
+        }
+        //PrintAll(top);
         MemoryFree(weight);
         if(bias_term){
-            MemoryFree(bias->data);
             MemoryFree(bias);
         }
+        return top;
     }
 
     if (node->net_type == NID_MAX_POOLING){
+        //printf(">>>Enter max pooling:%d\n", node->layer_id);
         ParamsBlobL *params = (ParamsBlobL*)MemoryPool(sizeof(ParamsBlobL));
         params->kernel_h = node->params[0];
         params->kernel_w = node->params[1];
@@ -169,25 +179,29 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
         params->stride_h = node->params[4];
         params->stride_w = node->params[5];
 
-        MaxPooling(bottom, top, params);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
+        top = MaxPooling(bottom, params);
+
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
         MemoryFree(params);
+        return top;
     }
 
     if (node->net_type == NID_RELU){
-        ReLU(bottom, top);
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
+        //printf(">>>Enter relu:%d\n", node->layer_id);
+        top = ReLU(bottom);
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
+        return top;
     }
 
     if (node->net_type == NID_SCALE){
+        //printf(">>>Enter scale:%d\n", node->layer_id);
+        //printf("===>params num: %d\n", node->params_num);
         WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         gamma->data = node->weight;
         uchar bias_term = node->params[1];
@@ -200,35 +214,43 @@ LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top){
             beta = NULL;
         }
 
-        Scale(bottom, top, gamma, beta, bias_term);
+        top = Scale(bottom, gamma, beta, bias_term);
 
-        *bottom = *top;
-        top = (DataBlob*)MemoryPool(sizeof(DataBlob));
         if (node->node_num == 1){
-            NodeRun(node->top_1, bottom, top);
+            bottom = top;
+            top = NodeRun(node->top_1, bottom);
         }
-        MemoryFree(gamma->data);
         MemoryFree(gamma);
-        MemoryFree(beta->data);
         MemoryFree(beta);
+        return top;
     }
 
     if (node->net_type == NID_CADDTABLE){
-        return node;
+        top = bottom;
+        return top;
     }
-    else{
-        return NULL;
-    }
+    printf("warning: NULL return\n");
+    return NULL;
 }
 
 
 void NetWorkTest(){
+    uint i = 0;
     LayerNodeList *node_list = (LayerNodeList*)MemoryPool(sizeof(LayerNodeList));
-    NetFileParse("network.dat", node_list);
+    NetFileParse("tools/network.dat", node_list);
     LinkNode(node_list);
-    WeightFileParse("model.dat", node_list);
+    WeightFileParse("tools/weight.dat", node_list);
+    printf("data parse done!\n");
     DataBlob *bottom = (DataBlob*)MemoryPool(sizeof(bottom));
-    DataBlob *top = (DataBlob*)MemoryPool(sizeof(top));
-    NodeRun(node_list->node_list[0], bottom, top);
+    bottom->n = 1;
+    bottom->c = 3;
+    bottom->h = 32;
+    bottom->w = 32;
+    bottom->data = (D_Type*)MemoryPool(sizeof(D_Type)*32*32*3);//32*32*3=3072
+    for (i=0;i<3072;i=i+1){
+        bottom->data[i]= i%10+i*0.02;
+    }
+    DataBlob *top = NodeRun(node_list->node_list[0], bottom);
     PrintAll(top);
+    MemoryFree(top);
 }

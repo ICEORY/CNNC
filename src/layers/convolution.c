@@ -3,17 +3,18 @@
 #include <math.h>
 #include <stdio.h>
 
-void Convolution(DataBlob *bottom, DataBlob *top,
+DataBlob* Convolution(DataBlob *bottom,
                  const WeightBlob *weight, const WeightBlob *bias,
                  const ParamsBlobS *params, const uchar bias_term){
 
     uint n=0, co=0, ci=0, h=0, w=0;
     uchar kh=0, kw=0;
 
+    DataBlob *top = (DataBlob*)MemoryPool(sizeof(DataBlob));
     top->n = bottom->n;
     top->c = weight->out_plane;
-    top->h = (uint)(ceil((float)(bottom->h+2*params->padding_h-weight->kernel_h)/params->stride_h))+1;
-    top->w = (uint)(ceil((float)(bottom->w+2*params->padding_w-weight->kernel_w)/params->stride_w))+1;
+    top->h = (uint)(floor((float)(bottom->h+2*params->padding_h-weight->kernel_h)/params->stride_h))+1;
+    top->w = (uint)(floor((float)(bottom->w+2*params->padding_w-weight->kernel_w)/params->stride_w))+1;
     top->data = (D_Type*)MemoryPool(sizeof(D_Type)*top->n*top->c*top->h*top->w);
 
     for (n=0;n<bottom->n;n=n+1){
@@ -50,27 +51,35 @@ void Convolution(DataBlob *bottom, DataBlob *top,
             }
         }
     }
+    //printf(">>>convolution: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    MemoryFree(bottom->data);
     MemoryFree(bottom);
+    return top;
 }
 
 
 void ConvolutionTest(){
     D_Type input[9] = {1, -2, 3, 4, 5, -3, 4 , 5, 6};
-    DataBlob *bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    bottom->n = 1;
-    bottom->c = 1;
-    bottom->h = 3;
-    bottom->w = 3;
-    bottom->data = input;
+    DataBlob *bottom;
+    DataBlob *top;
+    uint i=0;
 
-    D_Type weight_data[9] = {2, 4, -1, 3, 9, -6, 7, 2, 4};
-    WeightBlob weight = {1,1,3,3,weight_data};
-    D_Type bias_data[1] = {-1};
-    WeightBlob bias = {1,1,1,1,bias_data};
-    ParamsBlobS params = {1,1,1,1};
+    for (i=0;i<10;i=i+1){
+        bottom = (DataBlob *)MemoryPool(sizeof(DataBlob));
+        bottom->n = 1;
+        bottom->c = 1;
+        bottom->h = 3;
+        bottom->w = 3;
+        bottom->data = input;
+        D_Type weight_data[9] = {2, 4, -1, 3, 9, -6, 7, 2, 4};
+        WeightBlob weight = {1,1,3,3,weight_data};
+        D_Type bias_data[1] = {-1};
+        WeightBlob bias = {1,1,1,1,bias_data};
+        ParamsBlobS params = {1,1,1,1};
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    Convolution(bottom, top, &weight, &bias, &params, 1);
-    PrintAll(top);
+        top = Convolution(bottom, &weight, &bias, &params, 1);
+        bottom = top;
+        PrintAll(top);
+    }
     printf("Test Convolution Pass\n");
 }

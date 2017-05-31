@@ -4,25 +4,25 @@
 
 uint ReadDatUInt(FILE *fp){
     uint f_input_data = 0;
-    fscanf(fp, "%d", &f_input_data);
+    fscanf(fp, "%d ", &f_input_data);
     return f_input_data;
 }
 
 uchar ReadDatChar(FILE *fp){
     uchar f_input_data = 0;
-    fscanf(fp, "%c", &f_input_data);
+    fscanf(fp, "%d ", &f_input_data);
     return f_input_data;
 }
 
 D_Type ReadDatDType(FILE *fp){
     D_Type f_input_data = 0;
-    fscanf(fp, "%f", &f_input_data);
+    fscanf(fp, "%f ", &f_input_data);
     return f_input_data;
 }
 
 void ReadDatTest(){
     FILE *fp;
-    fp = fopen("test.dat", "r");
+    fp = fopen("tools/network.dat", "r");
     uchar data;
     uint count = 0;
     while(!feof(fp)){

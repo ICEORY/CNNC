@@ -5,8 +5,9 @@
 /**
 average pooling layer
 input: DataBlob *bottom, Data *top, ParamsBlobL *params
+return: output feature maps
 */
-void AvgPooling(DataBlob *bottom, DataBlob *top, const ParamsBlobL *params);
+DataBlob* AvgPooling(DataBlob *bottom, const ParamsBlobL *params);
 
 /**
 test avg_pooling_layer

@@ -18,8 +18,9 @@
 /**
 node run: run every node on node_list
 input: LayerNode *node, DataBlob *bottom, DataBlob *top
+return: top feature maps
 */
-LayerNode* NodeRun(LayerNode *node, DataBlob *bottom, DataBlob *top);
+DataBlob* NodeRun(const LayerNode *node, DataBlob *bottom);
 
 /**
 test net run

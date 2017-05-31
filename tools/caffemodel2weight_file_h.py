@@ -4,7 +4,6 @@ import math
 import numpy as np
 
 
-
 class LayerNode(object):
     def __init__(self, net_type, layer_id, layer_name,
                  bottom_names, top_names):
@@ -26,43 +25,43 @@ class LayerNode(object):
         convoludion:
         format: net_type, layer_id, top_layer, in_plane, out_plane, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w,  bias_term
         length: 3+9
-        
+
         batch normalization:
         format: net_type, layer_id, top_layer, in_plane
         length: 3+1
-        
+
         relu:
         format: net_type, layer_id, top_layer
         length: 3+0
-        
+
         avg pooling:
         format: net_type, layer_id, top_layer, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w
         length: 3+6
-        
+
         max pooling:
         format: net_type, layer_id, top_layer, kernel_h, kernel_w, padding_h, padding_w, stride_h, stride_w
         length: 3+6
-        
+
         linear:
         format: net_type, layer_id, top_layer, in_plane, out_plane, bias_term
         length: 3+3
-        
+
         scale:
         format: net_type, layer_id, top_layer, in_plane, bias_term
         length: 3+2
-        
+
         caddtable:
         format: net_type, layer_id, top_layer
         length: 3+0
-        
+
         concattable:
         format: net_type, layer_id, top_layer_1, top_layer_2;
         length: 4+0
-        
+
         data layer:
         format: net_type, layer_id, top_layer, batch_size, channel, height, width
         length: 3+4
-        
+
         ==============================================================
         define net_type_id
         # define NID_CONVOLUTION 0X01
@@ -153,7 +152,7 @@ def main():
 
     replace_flag = False
     for layer_name, bottom_names in net.bottom_names.items():
-        node = LayerNode(net_type=net.layers[layer_id].type, layer_id=layer_id,layer_name=layer_name,
+        node = LayerNode(net_type=net.layers[layer_id].type, layer_id=layer_id, layer_name=layer_name,
                          bottom_names=bottom_names, top_names=net.top_names.get(layer_name))
 
         node.weight = net.params.get(layer_name)
@@ -163,7 +162,7 @@ def main():
         if len(node.bottom_names) == 1 and len(node.top_names) == 1 and node.bottom_names[0] == node.top_names[0]:
             name_projection_dict[node.top_names[0]] = layer_name
             node.top_names[0] = layer_name
-            node.bottom_names[0] = node_list[layer_id-1].layer_name
+            node.bottom_names[0] = node_list[layer_id - 1].layer_name
         else:
             for i in range(len(node.bottom_names)):
                 if node.bottom_names[i] in name_projection_dict:
@@ -189,27 +188,18 @@ def main():
         if name in bottom_link_list:
             node_list[top_id[0]].top_id.append(bottom_link_list[name][0])
 
-    net_dat_path = "network.dat"
-    weight_dat_path = "weight.dat"
+    weight_h_path = "weight_file.h"
 
-    net_dat_f = open(net_dat_path, "w")
-    weight_dat_f = open(weight_dat_path, "w")
+    weight_h_f = open(weight_h_path, "w")
 
-    net_dat_f.write("%d " % len(node_list))
+    weight_h_f.write('''#ifndef _WEIGHT_FILE_H_\n#define _WEIGHT_FILE_H_\n\n#include "utils.h" ''')
+    weight_h_f.write('''/**\nthis file only for saving data of weights
+name format: DATA_netType_blockID_layerID, i.e. DATA_CONV_1_1
+*/
+/**example for resnet-20*/\n''')
+
+    weight_count = 0
     for node_item in node_list:
-        net_dat_f.write("%d %d " % (node_item.net_type_id, node_item.layer_id))
-        if node_item.net_type_id == 9 and len(node_item.top_id) <= 1:
-            print node_item.layer_id, node_item.top_names, node_item.top_id
-        if len(node_item.top_id) >= 1:
-            for top_id_item in node_item.top_id:
-                net_dat_f.write("%d " % top_id_item)
-        else:
-            net_dat_f.write("%d " % (2*len(node_list)))
-
-        for params_item in node_item.params:
-            net_dat_f.write("%d " % params_item)
-        net_dat_f.write("\n")
-
         if node_item.weight is not None:
             flat_weight = None
             data_len = 0
@@ -220,22 +210,32 @@ def main():
                 else:
                     flat_weight = np.row_stack((flat_weight, weight_item.data.reshape(weight_item.data.size, 1)))
             flat_weight = flat_weight.reshape(flat_weight.size)
-            weight_dat_f.write("%d " % node_item.layer_id)
-            weight_dat_f.write("%d " % data_len)
+            weight_h_f.write("//Net Type:%s Params:" % node_item.net_type)
+            for params_item in node_item.params:
+                weight_h_f.write("%d, " % params_item)
+            weight_h_f.write("\nD_Type %s[%d] = {\n" % (node_item.layer_name, data_len))
             for i in range(data_len):
-                weight_dat_f.write("%f " % flat_weight[i])
+                if i+1 == data_len:
+                    weight_h_f.write("%f " % flat_weight[i])
+                else:
+                    weight_h_f.write("%f, " % flat_weight[i])
+                    if (i+1) % 16 == 0:
+                        weight_h_f.write("\n")
+            weight_h_f.write("\n};\n")
+            weight_count += 1
 
-    net_dat_f.close()
-    weight_dat_f.close()
-    print ">>> Convert Done!"
-
+    weight_h_f.write("D_Type* data_weight_list[%d] = {\n" % weight_count)
     for node_item in node_list:
-        print node_item.net_type_id, node_item.layer_name, node_item.bottom_names, node_item.top_names
-    '''for node_item in node_list:
-        print node_item.net_type, node_item.layer_name, node_item.layer_id, node_item.blobs_shape
         if node_item.weight is not None:
-            for weight_items in node_item.weight:
-                print weight_items.data.shape'''
+            weight_h_f.write("    %s," % node_item.layer_name)
+            weight_h_f.write("//Net Type:%s Params:" % node_item.net_type)
+            for params_item in node_item.params:
+                weight_h_f.write("%d, " % params_item)
+            weight_h_f.write("\n")
+    weight_h_f.write("};\n#endif\n")
+
+    weight_h_f.close()
+    print ">>> Create Head File Done!"
 
 if __name__ == '__main__':
     main()

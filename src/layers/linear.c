@@ -7,13 +7,14 @@ output dim: N_o*C_o*1*1
 weight dim: N_w*C_i*C_o
 where N_i = N_o = N_w = batch size
 */
-void Linear(DataBlob *bottom, DataBlob *top,
+DataBlob* Linear(DataBlob *bottom,
             const WeightBlob *weight, const WeightBlob *bias,
             const uchar bias_term){
     uint n = 0;
     uint c_i = 0;
     uint c_o = 0;
 
+    DataBlob *top = (DataBlob*)MemoryPool(sizeof(DataBlob));
     top->n = bottom->n;
     top->c = weight->out_plane;
     top->h = 1;
@@ -33,7 +34,11 @@ void Linear(DataBlob *bottom, DataBlob *top,
             }
         }
     }
+    MemoryFree(bottom->data);
     MemoryFree(bottom);
+    //printf(">>>n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    return top;
+    //PrintAll(top);
 }
 
 
@@ -51,9 +56,7 @@ void LinearTest(){
     D_Type bias_data[2] = {-1, 8};
     WeightBlob bias = {1,2,1,1,bias_data};
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-
-    Linear(bottom, top, &weight, &bias, 1);
+    DataBlob *top = Linear(bottom, &weight, &bias, 1);
     PrintAll(top);
     printf("Test Linear Pass\n");
 }

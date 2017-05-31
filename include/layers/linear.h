@@ -12,8 +12,9 @@ Linear layer:
 input:  DataBlob *bottom, DataBlob *top,
         const WeightBlob *weight, const WeightBlob *bias,
         const uchar bias_term
+output: top feature maps
 */
-void Linear(DataBlob *bottom, DataBlob *top,
+DataBlob* Linear(DataBlob *bottom,
             const WeightBlob *weight, const WeightBlob *bias,
             const uchar bias_term);
 

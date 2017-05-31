@@ -31,7 +31,7 @@ void PrintAll(DataBlob *data){
 TO DO:
 you need to re-write these two function for more efficient management of memory pool
 */
-void* MemoryPool(uint mem_size){
+void* MemoryPool(long mem_size){
     void *ptr = (void *) malloc(mem_size);
     memset(ptr, 0, mem_size);
     return ptr;

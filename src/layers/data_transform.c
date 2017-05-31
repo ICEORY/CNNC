@@ -3,9 +3,10 @@
 #include <math.h>
 #include <stdio.h>
 
-void CenterCrop(DataBlob *bottom, DataBlob *top, uint crop_h, uint crop_w){
+DataBlob* CenterCrop(DataBlob *bottom, uint crop_h, uint crop_w){
     uint n=0, c=0, h=0, w=0;
 
+    DataBlob *top = (DataBlob*)MemoryPool(sizeof(DataBlob));
     top->n = bottom->n;
     top->c = bottom->c;
     top->h = crop_h;
@@ -32,14 +33,15 @@ void CenterCrop(DataBlob *bottom, DataBlob *top, uint crop_h, uint crop_w){
             }
         }
     }
+    MemoryFree(bottom->data);
     MemoryFree(bottom);
+    return top;
 }
 
-void DataNormalize(DataBlob *bottom, DataBlob *top, const D_Type *mean, const D_Type *std_dev){
+DataBlob* DataNormalize(DataBlob *bottom, const D_Type *mean, const D_Type *std_dev){
     uint n=0, c=0, h=0, w=0;
 
-    MemoryFree(top);
-    *top = *bottom;
+    DataBlob *top = bottom;
     for (n=0;n<bottom->n;n=n+1){
         for (c=0;c<top->c;c=c+1){
             uint top_offset = n*top->c*top->h*top->w+c*top->h*top->w;
@@ -51,6 +53,7 @@ void DataNormalize(DataBlob *bottom, DataBlob *top, const D_Type *mean, const D_
             }
         }
     }
+    return top;
 }
 
 void CenterCropTest(){
@@ -68,8 +71,7 @@ void CenterCropTest(){
     bottom->w = 5;
     bottom->data = input;
 
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    CenterCrop(bottom, top, 3, 3);
+    DataBlob *top = CenterCrop(bottom, 3, 3);
     PrintAll(top);
     printf("Test CenterCrop Pass\n");
 
@@ -92,8 +94,7 @@ void DataNormalizeTest(){
 
     D_Type mean[1] = {2.32};
     D_Type std_dev[1] = {3.02};
-    DataBlob *top = (DataBlob *)MemoryPool(sizeof(DataBlob));
-    DataNormalize(bottom, top, mean, std_dev);
+    DataBlob *top = DataNormalize(bottom, mean, std_dev);
     PrintAll(top);
     printf("Test DataNormalize Pass\n");
 }

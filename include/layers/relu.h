@@ -8,9 +8,10 @@
 /**
 ReLU: y = max(x,0);
 input: DataBlob *bottom, DataBlob *top
+return: top feature maps
 */
 
-void ReLU(DataBlob *bottom, DataBlob *top);
+DataBlob* ReLU(DataBlob *bottom);
 
 /**
 test relu layer
