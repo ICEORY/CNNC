@@ -9,7 +9,14 @@
 #include "max_pooling.h"
 #include "relu.h"
 #include "scale.h"
+#include "conv_bn_scale_relu.h"
+
+/**
+Notice: weight_file.h contains all weights of model,
+you can generate it by running tools/caffemodel2weight_file_h.py
+*/
 #include "weight_file.h"
+
 
 #include "utils.h"
 #include <stdio.h>
@@ -138,11 +145,66 @@ DataBlob* avg_pooling_layer(DataBlob *bottom){
     return top;
 }
 
+DataBlob* convb_bnn_relu(DataBlob *bottom, uint in_plane, uint out_plane,
+                         uchar kernel, uchar padding, uchar stride,
+                         D_Type *conv_weight, D_Type *bn_weight, D_Type *scale_weight){
+    ParamsBlobL *params = (ParamsBlobL*)MemoryPool(sizeof(ParamsBlobL));
+    params->kernel_h = kernel;
+    params->kernel_w = kernel;
+    params->padding_h = padding;
+    params->padding_w = padding;
+    params->stride_h = stride;
+    params->stride_w = stride;
+
+    D_Type *conv_bias = conv_weight+in_plane*out_plane*kernel*kernel;
+
+    D_Type *bn_mean = bn_weight;
+    D_Type *bn_var = bn_weight+out_plane;
+    D_Type *bn_factor = bn_weight+out_plane*2;
+
+    D_Type *scale_gamma = scale_weight;
+
+    DataBlob *top = Ensemble_Convb_BNn_ReLU(bottom, params, in_plane, out_plane, conv_weight, conv_bias,
+                                            bn_mean, bn_var, bn_factor[0], scale_gamma);
+    MemoryFree(params);
+    return top;
+}
+
+DataBlob* convb_bnn(DataBlob *bottom, uint in_plane, uint out_plane,
+                    uchar kernel, uchar padding, uchar stride,
+                    D_Type *conv_weight, D_Type *bn_weight, D_Type *scale_weight){
+    ParamsBlobL *params = (ParamsBlobL*)MemoryPool(sizeof(ParamsBlobL));
+    params->kernel_h = kernel;
+    params->kernel_w = kernel;
+    params->padding_h = padding;
+    params->padding_w = padding;
+    params->stride_h = stride;
+    params->stride_w = stride;
+
+    D_Type *conv_bias = conv_weight+in_plane*out_plane*kernel*kernel;
+
+    D_Type *bn_mean = bn_weight;
+    D_Type *bn_var = bn_weight+out_plane;
+    D_Type *bn_factor = bn_weight+out_plane*2;
+
+    D_Type *scale_gamma = scale_weight;
+
+    DataBlob *top = Ensemble_Convb_BNn(bottom, params, in_plane, out_plane, conv_weight, conv_bias,
+                                       bn_mean, bn_var, bn_factor[0], scale_gamma);
+    MemoryFree(params);
+    return top;
+}
 
 DataBlob* ResidualBranch(DataBlob *bottom,
                     uint in_plane, uint out_plane, uchar stride,
                     D_Type **weight, uchar ptr_offset){
-    DataBlob *top = conv3x3_layer(bottom, in_plane, out_plane, stride, weight[ptr_offset]);
+
+
+    DataBlob* top = convb_bnn_relu(bottom, in_plane, out_plane, 3, 1, stride, weight[ptr_offset], weight[ptr_offset+1], weight[ptr_offset+2]);
+    bottom = top;
+    top = convb_bnn(bottom, out_plane, out_plane, 3, 1, 1, weight[ptr_offset+3], weight[ptr_offset+4], weight[ptr_offset+5]);
+    bottom = top;
+    /*DataBlob *top = conv3x3_layer(bottom, in_plane, out_plane, stride, weight[ptr_offset]);
     bottom = top;
 
     top = batch_norm_layer(bottom, weight[ptr_offset+1]);
@@ -152,15 +214,15 @@ DataBlob* ResidualBranch(DataBlob *bottom,
     bottom = top;
 
     top = ReLU(bottom);
-    bottom = top;
+    bottom = top;*/
 
-    top = conv3x3_layer(bottom, out_plane, out_plane, 1, weight[ptr_offset+3]);
+    /*top = conv3x3_layer(bottom, out_plane, out_plane, 1, weight[ptr_offset+3]);
     bottom = top;
 
     top = batch_norm_layer(bottom, weight[ptr_offset+4]);
     bottom = top;
 
-    top = scale_layer(bottom, weight[ptr_offset+5]);
+    top = scale_layer(bottom, weight[ptr_offset+5]);*/
 
     return top;
 }
@@ -182,6 +244,10 @@ DataBlob* ResidualBlock(DataBlob *bottom, uint in_plane, uint out_plane, D_Type 
     }
 
     if (down_sample_term){
+        top_2 = convb_bnn(bottom_2, in_plane, out_plane, 1, 0, 2, weight[ptr_offset+6], weight[ptr_offset+7], weight[ptr_offset+8]);
+        bottom_2 = top_2;
+        /*
+        bottom = top;
         top_2 = conv1x1_layer(bottom_2, in_plane, out_plane, 2, weight[ptr_offset+6]);
         bottom_2 = top_2;
 
@@ -190,7 +256,7 @@ DataBlob* ResidualBlock(DataBlob *bottom, uint in_plane, uint out_plane, D_Type 
         //PrintAll(bottom_2);
 
         top_2 = scale_layer(bottom_2, weight[ptr_offset+8]);
-        bottom_2 = top_2;
+        bottom_2 = top_2;*/
 
     }
 
@@ -217,7 +283,10 @@ DataBlob* ResNet_20(DataBlob *bottom, D_Type **weight){
     //printf("=====>data load done!");
 
     // head convolutional layer
-    top = conv3x3_layer(bottom, 3, 16, 1, data_weight_list[0]);
+    top = convb_bnn_relu(bottom, 3, 16, 3, 1, 1, data_weight_list[0], data_weight_list[1], data_weight_list[2]);
+    bottom = top;
+
+    /*top = conv3x3_layer(bottom, 3, 16, 1, data_weight_list[0]);
     bottom = top;
 
     top = batch_norm_layer(bottom, data_weight_list[1]);
@@ -227,7 +296,7 @@ DataBlob* ResNet_20(DataBlob *bottom, D_Type **weight){
     bottom = top;
 
     top = ReLU(bottom);
-    bottom = top;
+    bottom = top;*/
 
 //================================================================================
     // block 1
@@ -281,7 +350,7 @@ void resnet20test(){
         bottom->data[i]= i%10+i*0.02;
     }
     DataBlob *top;
-    for(iter=0;iter<1;iter=iter+1){
+    for(iter=0;iter<40;iter=iter+1){
         top = ResNet_20(bottom, data_weight_list);
     }
     PrintAll(top);

@@ -10,12 +10,6 @@ input: FILE *fp
 uint ReadDatUInt(FILE *fp);
 
 /**
-Read .dat file, return unsigned char
-input: FILE *fp
-*/
-uchar ReadDatChar(FILE *fp);
-
-/**
 Read .dat file, return D_Type
 input: FILE *fp
 */

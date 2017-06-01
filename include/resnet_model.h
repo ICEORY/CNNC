@@ -38,6 +38,21 @@ wrapper of avg pooling layer
 */
 DataBlob* avg_pooling_layer(DataBlob *bottom);
 
+//==========================
+/**
+wrapper of Ensemble_conv(bias)_bn_(non beta)_relu
+*/
+DataBlob* convb_bnn_relu(DataBlob *bottom, uint in_plane, uint out_plane,
+                         uchar kernel, uchar padding, uchar stride,
+                         D_Type *conv_weight, D_Type *bn_weight, D_Type *scale_weight);
+
+/**
+wrapper of ensemble_conv(bias)_bn(non beta)_(non relu)
+*/
+DataBlob* convb_bnn(DataBlob *bottom, uint in_plane, uint out_plane,
+                    uchar kernel, uchar padding, uchar stride,
+                    D_Type *conv_weight, D_Type *bn_weight, D_Type *scale_weight);
+//==========================
 /**
 wrapper of residual branch
 */

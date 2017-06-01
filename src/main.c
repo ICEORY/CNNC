@@ -52,13 +52,7 @@ After All, good luck~~
 
 
 int main(){
-    //ConvolutionTest();
-    //TestAll();
-    //ReadDatTest();
-    //NetWorkTest();
-    resnet20test();
-    //system("Pause");
-    //AvgPoolingTest();
+    TestAll();
     return 0;
 }
 
