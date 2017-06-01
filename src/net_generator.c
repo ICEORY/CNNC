@@ -80,7 +80,7 @@ void NetFileParse(char *file_path, LayerNodeList *node_list){
     node_list->node_len = ReadDatChar(fp);
     node_list->node_list = (LayerNode**)MemoryPool(sizeof(LayerNode*)*(node_list->node_len));
     uchar net_type = 0;
-    printf("node length:%d\n", node_list->node_len);
+    //printf("node length:%d\n", node_list->node_len);
     while(!feof(fp)){
         net_type = ReadDatChar(fp);
         LayerNode *net_node = (LayerNode*)MemoryPool(sizeof(LayerNode));

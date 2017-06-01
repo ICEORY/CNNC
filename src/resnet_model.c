@@ -12,6 +12,7 @@
 #include "weight_file.h"
 
 #include "utils.h"
+#include <stdio.h>
 /*
 void ReadWeight(char *file_path, D_Type *data, uint weight_count){
     FILE *fp;
@@ -26,6 +27,14 @@ DataBlob* conv3x3_layer(DataBlob *bottom, uint in_plane, uint out_plane, uchar s
     weight->kernel_h = 3;
     weight->kernel_w = 3;
     weight->data = weight_data;
+
+    WeightBlob *bias;
+    bias = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    bias->in_plane = 1;
+    bias->out_plane = out_plane;
+    bias->kernel_h = 1;
+    bias->kernel_w = 1;
+    bias->data = weight_data+in_plane*out_plane*9;
     //ReadWeight(weight_file, weight->data, in_plane*out_plane*9);
 
     ParamsBlobS *params = (ParamsBlobS*)MemoryPool(sizeof(ParamsBlobS));
@@ -34,9 +43,10 @@ DataBlob* conv3x3_layer(DataBlob *bottom, uint in_plane, uint out_plane, uchar s
     params->stride_h = stride;
     params->stride_w = stride;
 
-    DataBlob *top = Convolution(bottom, weight, NULL, params, 0);
+    DataBlob *top = Convolution(bottom, weight, bias, params, 1);
     MemoryFree(weight);
     MemoryFree(params);
+    MemoryFree(bias);
     return top;
 }
 
@@ -55,9 +65,18 @@ DataBlob* conv1x1_layer(DataBlob *bottom, uint in_plane, uint out_plane, uchar s
     params->stride_h = stride;
     params->stride_w = stride;
 
-    DataBlob *top = Convolution(bottom, weight, NULL, params, 0);
+    WeightBlob *bias;
+    bias = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    bias->in_plane = 1;
+    bias->out_plane = out_plane;
+    bias->kernel_h = 1;
+    bias->kernel_w = 1;
+    bias->data = weight_data+in_plane*out_plane*1;
+
+    DataBlob *top = Convolution(bottom, weight, bias, params, 1);
     MemoryFree(weight);
     MemoryFree(params);
+    MemoryFree(bias);
     return top;
 }
 
@@ -81,19 +100,22 @@ DataBlob* scale_layer(DataBlob *bottom, D_Type* weight_data){
 
     WeightBlob *gamma = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
     gamma->data = buffer;
-    WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
-    beta->data = buffer+bottom->c;
+    //WeightBlob *beta = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    //beta->data = buffer+bottom->c;
 
-    DataBlob *top = Scale(bottom, gamma, beta, 1);
+    DataBlob *top = Scale(bottom, gamma, NULL, 0);
     MemoryFree(gamma);
-    MemoryFree(beta);
+    //MemoryFree(beta);
     return top;
 }
 
 DataBlob* linear_layer(DataBlob *bottom, D_Type* weight_data){
     D_Type *buffer = weight_data;
-
     WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
+    weight->in_plane = 64;
+    weight->out_plane = 10;
+    weight->kernel_h = 1;
+    weight->kernel_w = 1;
     weight->data = buffer;
     WeightBlob *bias = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
     bias->data = buffer+weight->in_plane*weight->out_plane;
@@ -126,13 +148,19 @@ DataBlob* ResidualBranch(DataBlob *bottom,
     top = batch_norm_layer(bottom, weight[ptr_offset+1]);
     bottom = top;
 
+    top = scale_layer(bottom, weight[ptr_offset+2]);
+    bottom = top;
+
     top = ReLU(bottom);
     bottom = top;
 
-    top = conv3x3_layer(bottom, out_plane, out_plane, 1, weight[ptr_offset+2]);
+    top = conv3x3_layer(bottom, out_plane, out_plane, 1, weight[ptr_offset+3]);
     bottom = top;
 
-    top = batch_norm_layer(bottom, weight[ptr_offset+3]);
+    top = batch_norm_layer(bottom, weight[ptr_offset+4]);
+    bottom = top;
+
+    top = scale_layer(bottom, weight[ptr_offset+5]);
 
     return top;
 }
@@ -144,33 +172,49 @@ DataBlob* ResidualBlock(DataBlob *bottom, uint in_plane, uint out_plane, D_Type 
     DataBlob *bottom_1 = top_1;
     DataBlob *bottom_2 = top_2;
 
-    top_1 = ResidualBranch(bottom_1, in_plane, out_plane, 1, weight, ptr_offset);
-    bottom_1 = top_1;
+    if (down_sample_term){
+        top_1 = ResidualBranch(bottom_1, in_plane, out_plane, 2, weight, ptr_offset);
+        bottom_1 = top_1;
+    }
+    else{
+        top_1 = ResidualBranch(bottom_1, in_plane, out_plane, 1, weight, ptr_offset);
+        bottom_1 = top_1;
+    }
 
     if (down_sample_term){
-        top_2 = conv1x1_layer(bottom_2, in_plane, out_plane, 2, weight[ptr_offset+4]);
+        top_2 = conv1x1_layer(bottom_2, in_plane, out_plane, 2, weight[ptr_offset+6]);
         bottom_2 = top_2;
 
-        top_2 = batch_norm_layer(bottom_2, weight[ptr_offset+5]);
+        top_2 = batch_norm_layer(bottom_2, weight[ptr_offset+7]);
         bottom_2 = top_2;
+        //PrintAll(bottom_2);
+
+        top_2 = scale_layer(bottom_2, weight[ptr_offset+8]);
+        bottom_2 = top_2;
+
     }
 
     DataBlob *top = CAddTable(bottom_1, bottom_2);
+    //PrintAll(top);
     bottom = top;
     top = ReLU(bottom);
+    //PrintAll(top);
+    //printf("=====>residual block %d\n",ptr_offset);
     return top;
 }
 
 
 DataBlob* ResNet_20(DataBlob *bottom, D_Type **weight){
     // data transform
+    //printf(">>>input data: n:%d, c:%d, h:%d, w:%d\n",bottom->n, bottom->c, bottom->h, bottom->w);
     DataBlob *top = CenterCrop(bottom, 32, 32);
     bottom = top;
-
-    D_Type mean[3] = {0.123, 0.123, 0.123};
-    D_Type std_dev[3] = {0.123, 0.123, 0.123};
+    D_Type mean[3] = {14.7183, 35.214, 55.69};
+    D_Type std_dev[3] = {43.30, 43.1095, 43.243};
     top = DataNormalize(bottom, mean, std_dev);
+
     bottom = top;
+    //printf("=====>data load done!");
 
     // head convolutional layer
     top = conv3x3_layer(bottom, 3, 16, 1, data_weight_list[0]);
@@ -179,60 +223,68 @@ DataBlob* ResNet_20(DataBlob *bottom, D_Type **weight){
     top = batch_norm_layer(bottom, data_weight_list[1]);
     bottom = top;
 
+    top = scale_layer(bottom, data_weight_list[2]);
+    bottom = top;
+
     top = ReLU(bottom);
     bottom = top;
 
 //================================================================================
     // block 1
-    top = ResidualBlock(bottom, 16, 16, weight, 0, 2);
+    top = ResidualBlock(bottom, 16, 16, weight, 0, 3);
     bottom = top;
 
-    top = ResidualBlock(bottom, 16, 16, weight, 0, 6);
+    top = ResidualBlock(bottom, 16, 16, weight, 0, 9);
     bottom = top;
 
-    top = ResidualBlock(bottom, 16, 16, weight, 0, 10);
-    bottom = top;
-//--------------------------
-    top = ResidualBlock(bottom, 32, 32, weight, 1, 14);
-    bottom = top;
-
-    top = ResidualBlock(bottom, 32, 32, weight, 0, 20);
-    bottom = top;
-
-    top = ResidualBlock(bottom, 32, 32, weight, 0, 24);
+    top = ResidualBlock(bottom, 16, 16, weight, 0, 15);
     bottom = top;
 
 //--------------------------
-    top = ResidualBlock(bottom, 64, 64, weight, 1, 28);
+    top = ResidualBlock(bottom, 16, 32, weight, 1, 21);
+    //PrintAll(top);
     bottom = top;
 
-    top = ResidualBlock(bottom, 64, 64, weight, 0, 34);
+    top = ResidualBlock(bottom, 32, 32, weight, 0, 30);
     bottom = top;
 
-    top = ResidualBlock(bottom, 64, 64, weight, 0, 38);
+    top = ResidualBlock(bottom, 32, 32, weight, 0, 36);
+    bottom = top;
+
+
+//--------------------------
+    top = ResidualBlock(bottom, 32, 64, weight, 1, 42);
+    bottom = top;
+
+    top = ResidualBlock(bottom, 64, 64, weight, 0, 51);
+    bottom = top;
+
+    top = ResidualBlock(bottom, 64, 64, weight, 0, 57);
     bottom = top;
 
     top = avg_pooling_layer(bottom);
     bottom = top;
 
-    top = linear_layer(bottom, weight[42]);
+    top = linear_layer(bottom, weight[63]);
     return top;
 }
 
 void resnet20test(){
     uint iter = 0, i=0;
-    for(iter=0;iter<1;iter=iter+1){
-        DataBlob *bottom = (DataBlob*)MemoryPool(sizeof(bottom));
-        bottom->n = 1;
-        bottom->c = 3;
-        bottom->h = 32;
-        bottom->w = 32;
-        bottom->data = (D_Type*)MemoryPool(sizeof(D_Type)*32*32*3);//32*32*3=3072
-        for (i=0;i<3072;i=i+1){
-            bottom->data[i]= i%10+i*0.02;
-        }
-        DataBlob *top = ResNet_20(bottom, data_weight_list);
-        PrintAll(top);
-        MemoryFree(top);
+    DataBlob *bottom = (DataBlob*)MemoryPool(sizeof(bottom));
+    bottom->n = 1;
+    bottom->c = 3;
+    bottom->h = 32;
+    bottom->w = 32;
+    bottom->data = (D_Type*)MemoryPool(sizeof(D_Type)*32*32*3);//32*32*3=3072
+    for (i=0;i<3072;i=i+1){
+        bottom->data[i]= i%10+i*0.02;
     }
+    DataBlob *top;
+    for(iter=0;iter<1;iter=iter+1){
+        top = ResNet_20(bottom, data_weight_list);
+    }
+    PrintAll(top);
+    MemoryFree(top->data);
+    MemoryFree(top);
 }

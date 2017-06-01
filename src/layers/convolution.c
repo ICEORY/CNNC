@@ -51,9 +51,9 @@ DataBlob* Convolution(DataBlob *bottom,
             }
         }
     }
-    //printf(">>>convolution: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
     MemoryFree(bottom->data);
     MemoryFree(bottom);
+    //printf(">>>convolution: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
     return top;
 }
 

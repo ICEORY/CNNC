@@ -11,18 +11,18 @@ DataBlob* ConcatTable(DataBlob *bottom, DataBlob *top_2){
     top_2->h = bottom->h;
     top_2->w = bottom->w;
     top_2->data = (D_Type*)MemoryPool(sizeof(D_Type)*bottom->n*bottom->c*bottom->h*bottom->w);
-    //printf(">>>concat table: n:%d, c:%d, h:%d, w:%d\n",top_1->n, top_1->c, top_1->h, top_1->w);
-    //printf(">>>concat table: n:%d, c:%d, h:%d, w:%d\n",top_2->n, top_2->c, top_2->h, top_2->w);
+
     for (i=0;i<top_count;i=i+1){
         top_2->data[i] = bottom->data[i];
     }
+    //printf(">>>concat table-1: n:%d, c:%d, h:%d, w:%d\n",top_1->n, top_1->c, top_1->h, top_1->w);
+    //printf(">>>concat table-2: n:%d, c:%d, h:%d, w:%d\n",top_2->n, top_2->c, top_2->h, top_2->w);
     return top_1;
 }
 
 DataBlob *CAddTable(DataBlob *bottom_1, DataBlob *bottom_2){
     uint top_count = bottom_1->n * bottom_1->c * bottom_1->h * bottom_1->w;
-    //printf(">>>add table: n:%d, c:%d, h:%d, w:%d\n",bottom_1->n, bottom_1->c, bottom_1->h, bottom_1->w);
-    //printf(">>>add table: n:%d, c:%d, h:%d, w:%d\n",bottom_2->n, bottom_2->c, bottom_2->h, bottom_2->w);
+
     uint i =0;
     DataBlob *top = bottom_1;
     for (i=0;i<top_count;i=i+1){
@@ -30,6 +30,7 @@ DataBlob *CAddTable(DataBlob *bottom_1, DataBlob *bottom_2){
     }
     MemoryFree(bottom_2->data);
     MemoryFree(bottom_2);
+    //printf(">>>add table: n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
     return top;
 }
 

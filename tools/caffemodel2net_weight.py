@@ -195,20 +195,20 @@ def main():
     net_dat_f = open(net_dat_path, "w")
     weight_dat_f = open(weight_dat_path, "w")
 
-    net_dat_f.write("%d " % len(node_list))
+    net_dat_f.write("%d\t" % len(node_list))
     for node_item in node_list:
-        net_dat_f.write("%d %d " % (node_item.net_type_id, node_item.layer_id))
+        net_dat_f.write("%d\t%d\t" % (node_item.net_type_id, node_item.layer_id))
         if node_item.net_type_id == 9 and len(node_item.top_id) <= 1:
             print node_item.layer_id, node_item.top_names, node_item.top_id
         if len(node_item.top_id) >= 1:
             for top_id_item in node_item.top_id:
-                net_dat_f.write("%d " % top_id_item)
+                net_dat_f.write("%d\t" % top_id_item)
         else:
-            net_dat_f.write("%d " % (2*len(node_list)))
+            net_dat_f.write("%d\t" % (2*len(node_list)))
 
         for params_item in node_item.params:
-            net_dat_f.write("%d " % params_item)
-        net_dat_f.write("\n")
+            net_dat_f.write("%d\t" % params_item)
+        # net_dat_f.write("\n")
 
         if node_item.weight is not None:
             flat_weight = None

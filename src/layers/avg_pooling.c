@@ -45,7 +45,7 @@ DataBlob* AvgPooling(DataBlob *bottom, const ParamsBlobL *params){
     }
     MemoryFree(bottom->data);
     MemoryFree(bottom);
-    //printf(">>>n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    //printf(">>>avg pooling n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
     return top;
 }
 

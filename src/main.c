@@ -35,6 +35,7 @@
     ReLUTest();
     ScaleTest();
     ReadDatTest();
+    resnet20test();
  }
 
 /**
@@ -54,10 +55,8 @@ int main(){
     //ConvolutionTest();
     //TestAll();
     //ReadDatTest();
-    //uint i = 0;
-    //for (i=0;i<1;i=i+1){
-    //    NetWorkTest();
-    //}
+    //NetWorkTest();
+    resnet20test();
     //system("Pause");
     //AvgPoolingTest();
     return 0;

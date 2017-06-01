@@ -82,12 +82,16 @@ DataBlob* NodeRun(const LayerNode *node, DataBlob *bottom){
             bottom = top;
             top = NodeRun(merge_node->top_1, bottom);
         }
-        free(merge_node);
+        MemoryFree(merge_node->params);
+        MemoryFree(merge_node->weight);
+        MemoryFree(merge_node->top_1);
+        MemoryFree(merge_node->top_2);
+        MemoryFree(merge_node);
         return top;
     }
 
     if (node->net_type == NID_CONVOLUTION){
-        //printf(">>>Enter convolution:%d\n", node->layer_id);
+        printf(">>>Enter convolution:%d\n", node->layer_id);
         WeightBlob *weight = (WeightBlob*)MemoryPool(sizeof(WeightBlob));
         //printf("===>params num: %d\n", node->params_num);
         weight->data = node->weight;
@@ -128,9 +132,11 @@ DataBlob* NodeRun(const LayerNode *node, DataBlob *bottom){
     }
 
     if (node->net_type == NID_DATA_LAYER){
-        //printf(">>>Enter data:%d\n", node->layer_id);
+        printf(">>>Enter data:%d\n", node->layer_id);
         // you can add preprocessing program here
+        top = CenterCrop(bottom, 32, 32);
         if (node->node_num == 1){
+            bottom = top;
             top = NodeRun(node->top_1, bottom);
         }
         return top;
@@ -229,7 +235,7 @@ DataBlob* NodeRun(const LayerNode *node, DataBlob *bottom){
         top = bottom;
         return top;
     }
-    printf("warning: NULL return\n");
+    printf("warning: NULL return:%d\n", node->net_type);
     return NULL;
 }
 
@@ -240,7 +246,7 @@ void NetWorkTest(){
     NetFileParse("tools/network.dat", node_list);
     LinkNode(node_list);
     WeightFileParse("tools/weight.dat", node_list);
-    printf("data parse done!\n");
+    //printf("data parse done!\n");
     DataBlob *bottom = (DataBlob*)MemoryPool(sizeof(bottom));
     bottom->n = 1;
     bottom->c = 3;
@@ -250,7 +256,15 @@ void NetWorkTest(){
     for (i=0;i<3072;i=i+1){
         bottom->data[i]= i%10+i*0.02;
     }
-    DataBlob *top = NodeRun(node_list->node_list[0], bottom);
-    PrintAll(top);
-    MemoryFree(top);
+    DataBlob *top;
+    for (i=0;i<1;i=i+1){
+        top = NodeRun(node_list->node_list[0], bottom);
+        printf("%d\n",i);
+        /*if (top!=NULL){
+            MemoryFree(top->data);
+            MemoryFree(top);
+        }*/
+    }
+    //PrintAll(top);
+    //MemoryFree(top);
 }

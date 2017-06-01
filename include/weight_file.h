@@ -17351,18 +17351,21 @@ D_Type* data_weight_list[64] = {
     conv_1,//Net Type:Convolution Params:3, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_1,//Net Type:BatchNorm Params:16,
     scale_1,//Net Type:Scale Params:16, 0,
+
     conv_2,//Net Type:Convolution Params:16, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_2,//Net Type:BatchNorm Params:16,
     scale_2,//Net Type:Scale Params:16, 0,
     conv_3,//Net Type:Convolution Params:16, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_3,//Net Type:BatchNorm Params:16,
     scale_3,//Net Type:Scale Params:16, 0,
+
     conv_4,//Net Type:Convolution Params:16, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_4,//Net Type:BatchNorm Params:16,
     scale_4,//Net Type:Scale Params:16, 0,
     conv_5,//Net Type:Convolution Params:16, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_5,//Net Type:BatchNorm Params:16,
     scale_5,//Net Type:Scale Params:16, 0,
+
     conv_6,//Net Type:Convolution Params:16, 16, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_6,//Net Type:BatchNorm Params:16,
     scale_6,//Net Type:Scale Params:16, 0,
@@ -17378,15 +17381,18 @@ D_Type* data_weight_list[64] = {
     conv_10,//Net Type:Convolution Params:32, 32, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_10,//Net Type:BatchNorm Params:32,
     scale_10,//Net Type:Scale Params:32, 0,
+
     conv_8,//Net Type:Convolution Params:16, 32, 1, 1, 0, 0, 2, 2, 1,
     batchNorm_8,//Net Type:BatchNorm Params:32,
     scale_8,//Net Type:Scale Params:32, 0,
+
     conv_11,//Net Type:Convolution Params:32, 32, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_11,//Net Type:BatchNorm Params:32,
     scale_11,//Net Type:Scale Params:32, 0,
     conv_12,//Net Type:Convolution Params:32, 32, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_12,//Net Type:BatchNorm Params:32,
     scale_12,//Net Type:Scale Params:32, 0,
+
     conv_13,//Net Type:Convolution Params:32, 32, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_13,//Net Type:BatchNorm Params:32,
     scale_13,//Net Type:Scale Params:32, 0,
@@ -17402,21 +17408,25 @@ D_Type* data_weight_list[64] = {
     conv_17,//Net Type:Convolution Params:64, 64, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_17,//Net Type:BatchNorm Params:64,
     scale_17,//Net Type:Scale Params:64, 0,
+
     conv_15,//Net Type:Convolution Params:32, 64, 1, 1, 0, 0, 2, 2, 1,
     batchNorm_15,//Net Type:BatchNorm Params:64,
     scale_15,//Net Type:Scale Params:64, 0,
+
     conv_18,//Net Type:Convolution Params:64, 64, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_18,//Net Type:BatchNorm Params:64,
     scale_18,//Net Type:Scale Params:64, 0,
     conv_19,//Net Type:Convolution Params:64, 64, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_19,//Net Type:BatchNorm Params:64,
     scale_19,//Net Type:Scale Params:64, 0,
+
     conv_20,//Net Type:Convolution Params:64, 64, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_20,//Net Type:BatchNorm Params:64,
     scale_20,//Net Type:Scale Params:64, 0,
     conv_21,//Net Type:Convolution Params:64, 64, 3, 3, 1, 1, 1, 1, 1,
     batchNorm_21,//Net Type:BatchNorm Params:64,
     scale_21,//Net Type:Scale Params:64, 0,
+
     fc10,//Net Type:InnerProduct Params:64, 10, 1,
 };
 #endif

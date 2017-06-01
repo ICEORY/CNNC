@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include "string.h"
+#include <errno.h>
 /**
 print all data of DataBlob object
 */
@@ -33,10 +34,21 @@ you need to re-write these two function for more efficient management of memory 
 */
 void* MemoryPool(long mem_size){
     void *ptr = (void *) malloc(mem_size);
-    memset(ptr, 0, mem_size);
+    if (ptr == NULL){
+        printf("Error assign memory failed\n");
+        printf("%d_%s\n",errno,strerror(errno));
+        exit(0);
+    }
+    else{
+        memset(ptr, 0, mem_size);
+    }
     return ptr;
 }
 
 void MemoryFree(void *p){
-    free(p);
+    if (p!=NULL){
+        free(p);
+        p = NULL;
+    }
+    //printf("%d_%s\n",errno,strerror(errno));
 }

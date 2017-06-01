@@ -36,7 +36,7 @@ DataBlob* Linear(DataBlob *bottom,
     }
     MemoryFree(bottom->data);
     MemoryFree(bottom);
-    //printf(">>>n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
+    //printf(">>>linear n:%d, c:%d, h:%d, w:%d\n",top->n, top->c, top->h, top->w);
     return top;
     //PrintAll(top);
 }
